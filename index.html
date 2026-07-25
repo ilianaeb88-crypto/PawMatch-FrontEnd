@@ -1,13 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pawmatch-frontend</title>
+    <title>Pawmatch</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div class="page">
+      <header class="topbar">
+        <a href="#" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#">Profile</a>
+          <a href="#">Available Pets</a>
+          <a href="#">Questionnaire</a>
+          <a href="#">Best Matches</a>
+        </nav>
+      </header>
+
+      <main class="hero">
+        <section class="hero-copy">
+          <h1>Every Pet Deserves a Loving Home</h1>
+          <p class="subheading">
+            Answer a detailed questionnaire about your preferences and lifestyle
+            to discover your perfect pet.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#" class="btn btn-primary">🗒️ Find Your Match</a>
+            <a href="#" class="btn btn-secondary">🔎 Available Pets</a>
+          </div>
+        </section>
+
+        <aside class="hero-cta" aria-label="Account actions">
+          <a href="#" class="cta-btn">Sign in</a>
+          <a href="#" class="cta-btn cta-btn-outline">Create an Account</a>
+        </aside>
+      </main>
+    </div>
   </body>
 </html>
