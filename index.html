@@ -15,10 +15,11 @@
         </a>
 
         <nav class="nav-links" aria-label="Primary navigation">
-          <a href="#">Profile</a>
-          <a href="#">Available Pets</a>
-          <a href="#">Questionnaire</a>
-          <a href="#">Best Matches</a>
+          <span class="nav-item">Profile</span>
+          <span class="nav-item">Questionnaire</span>
+          <span class="nav-item">Best Matches</span>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
         </nav>
       </header>
 
@@ -31,16 +32,29 @@
           </p>
 
           <div class="hero-actions">
-            <a href="#" class="btn btn-primary">🗒️ Find Your Match</a>
-            <a href="#" class="btn btn-secondary">🔎 Available Pets</a>
+            <a href="adoption-choice.html" class="nav-item nav-pill">
+              <span class="nav-icon" aria-hidden="true">🔎</span>
+              <span>Find Your Match</span>
+            </a>
+
+            <a href="#" class="nav-item nav-pill nav-pill-outline">
+              <span class="nav-icon" aria-hidden="true">🐾</span>
+              <span>Available Pets</span>
+            </a>
           </div>
         </section>
 
-        <aside class="hero-cta" aria-label="Account actions">
-          <a href="#" class="cta-btn">Sign in</a>
-          <a href="#" class="cta-btn cta-btn-outline">Create an Account</a>
-        </aside>
+        <div class="hero-media">
+          <img/> />
+        </div>
       </main>
     </div>
+
+    <script>
+      localStorage.removeItem("selectedPath");
+      localStorage.removeItem("selectedPet");
+      localStorage.removeItem("selectedGender");
+      localStorage.removeItem("selectedAge");
+    </script>
   </body>
 </html>

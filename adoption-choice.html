@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Choose Your Path</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#" class="nav-item">Profile</a>
+          <a href="#" class="nav-item">Questionnaire</a>
+          <a href="#" class="nav-item">Best Matches</a>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+
+      <main class="choice-bubble">
+        <h1>Are You Looking to Adopt or Foster?</h1>
+
+        <div class="choice-options" role="list">
+          <button class="choice-option choice-option-primary" type="button" data-choice="foster">
+            <span class="choice-circle" aria-hidden="true"></span>
+            <span class="choice-label">Foster</span>
+          </button>
+
+          <button class="choice-option choice-option-secondary" type="button" data-choice="adopt">
+            <span class="choice-circle" aria-hidden="true"></span>
+            <span class="choice-label">Adopt</span>
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const pathButtons = document.querySelectorAll(".choice-option");
+      const savedPath = localStorage.getItem("selectedPath");
+
+      pathButtons.forEach((button) => {
+        if (button.dataset.choice === savedPath) {
+          button.classList.add("is-selected");
+        }
+
+        button.addEventListener("click", () => {
+          pathButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedPath", button.dataset.choice);
+          window.location.href = "pet-choice.html";
+        });
+      });
+    </script>
+  </body>
+</html>

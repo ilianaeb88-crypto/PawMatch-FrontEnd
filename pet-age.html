@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Choose Pet Age</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#" class="nav-item">Profile</a>
+          <a href="#" class="nav-item">Questionnaire</a>
+          <a href="#" class="nav-item">Best Matches</a>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+
+      <main class="choice-bubble">
+        <h1>How Old do You Want Your Pet to Be?</h1>
+
+        <div class="choice-options age-options" role="list">
+          <button class="choice-option choice-option-primary" type="button" data-choice="1">1</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="2">2</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="3">3</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="4">4</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="5">5</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="6">6</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="7">7</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="8">8</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="9">9</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="10">10</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="11">11</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="12">12</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="13">13</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="14">14</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="15">15</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="greater-than-15">Greater than 15</button>
+        </div>
+
+        <a class="back-button" href="pet-gender.html">Back</a>
+      </main>
+    </div>
+
+    <script>
+      const ageButtons = document.querySelectorAll(".choice-option");
+      const savedAge = localStorage.getItem("selectedAge");
+
+      ageButtons.forEach((button) => {
+        if (button.dataset.choice === savedAge) {
+          button.classList.add("is-selected");
+        }
+
+        button.addEventListener("click", () => {
+          ageButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedAge", button.dataset.choice);
+        });
+      });
+    </script>
+  </body>
+</html>

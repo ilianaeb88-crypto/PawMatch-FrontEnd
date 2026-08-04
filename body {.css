@@ -1,0 +1,10 @@
+body {
+  background-color: #111111;
+  color: #f5f5f5;
+}
+
+.homepage,
+.main-content,
+.container {
+  background-color: #111111;
+}
