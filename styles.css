@@ -169,6 +169,22 @@ body {
   padding-top: 2rem;
 }
 
+.hero-media {
+  flex: 0 0 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.hero-media img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  display: block;
+  border-radius: 1.25rem;
+}
+
 .hero-copy h1 {
   font-size: 3rem;
   line-height: 1.1;
@@ -272,8 +288,11 @@ body {
 }
 
 .cat-image {
+  position: absolute;
   right: 90px;
   top: 0;
+  width: 320px;
+  height: 320px;
 }
 
 .dog-image {

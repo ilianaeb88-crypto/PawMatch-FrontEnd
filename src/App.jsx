@@ -2,6 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
+import catImg from './assets/cat.png'
 import './App.css'
 
 function App() {
@@ -115,6 +116,9 @@ function App() {
 
       <div className="ticks"></div>
       <section id="spacer"></section>
+      <div className="cat-container">
+        <img src={catImg} alt="Cat illustration" className="cat-image" />
+      </div>
     </>
   )
 }
