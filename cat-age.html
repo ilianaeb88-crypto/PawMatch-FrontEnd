@@ -33,7 +33,7 @@
           <button class="choice-option choice-option-primary" type="button" data-choice="greater-than-7">Greater than 7 (Senior)</button>
         </div>
 
-        <a class="back-button" href="pet-gender.html">Back</a>
+        <a class="back-button" href="cat-gender.html">Back</a>
       </main>
     </div>
 
@@ -50,7 +50,7 @@
           ageButtons.forEach((btn) => btn.classList.remove("is-selected"));
           button.classList.add("is-selected");
           localStorage.setItem("selectedAge", button.dataset.choice);
-          window.location.href = "pet-weight.html";
+          window.location.href = "cat-weight.html";
         });
       });
     </script>

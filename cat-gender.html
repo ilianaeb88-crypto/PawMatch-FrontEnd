@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pawmatch - Choose an Animal</title>
+    <title>Pawmatch - Choose Pet Gender</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page pet-choice-page">
+  <body class="choice-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="index.html" class="brand">
@@ -24,40 +24,43 @@
       </header>
 
       <main class="choice-bubble">
-        <h1>Would You Like a Cat or Dog?</h1>
+        <h1>What Gender of Pet Are You Looking For?</h1>
 
         <div class="choice-options" role="list">
-          <button class="choice-option choice-option-primary" type="button" data-choice="cat">
+          <button class="choice-option choice-option-primary" type="button" data-choice="male">
             <span class="choice-circle" aria-hidden="true"></span>
-            <span class="choice-label">Cat</span>
+            <span class="choice-label">Male</span>
           </button>
 
-          <button class="choice-option choice-option-secondary" type="button" data-choice="dog">
+          <button class="choice-option choice-option-secondary" type="button" data-choice="female">
             <span class="choice-circle" aria-hidden="true"></span>
-            <span class="choice-label">Dog</span>
+            <span class="choice-label">Female</span>
+          </button>
+
+          <button class="choice-option choice-option-secondary" type="button" data-choice="any">
+            <span class="choice-circle" aria-hidden="true"></span>
+            <span class="choice-label">No Preference</span>
           </button>
         </div>
 
-        <a class="back-button" href="adoption-choice.html">Back</a>
+        <a class="back-button" href="pet-choice.html">Back</a>
       </main>
     </div>
 
     <script>
-      const petButtons = document.querySelectorAll(".choice-option");
-      const savedPet = localStorage.getItem("selectedPet");
+      const genderButtons = document.querySelectorAll(".choice-option");
+      const savedGender = localStorage.getItem("selectedGender");
 
-      petButtons.forEach((button) => {
-        if (button.dataset.choice === savedPet) {
+      genderButtons.forEach((button) => {
+        if (button.dataset.choice === savedGender) {
           button.classList.add("is-selected");
         }
 
         button.addEventListener("click", () => {
-          petButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          genderButtons.forEach((btn) => btn.classList.remove("is-selected"));
           button.classList.add("is-selected");
-          localStorage.setItem("selectedPet", button.dataset.choice);
-          window.location.href = button.dataset.choice === "cat"
-            ? "cat-gender.html"
-            : "pet-gender.html";
+          localStorage.setItem("selectedGender", button.dataset.choice);
+          window.location.href = "cat-age.html";
         });
       });
     </script>
