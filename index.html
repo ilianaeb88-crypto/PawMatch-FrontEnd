@@ -16,10 +16,9 @@
 
         <nav class="nav-links" aria-label="Primary navigation">
           <span class="nav-item">Profile</span>
-          <span class="nav-item">Questionnaire</span>
+          <a href="adoption-choice.html" class="nav-item">Questionnaire</a>
           <span class="nav-item">Best Matches</span>
-          <a href="#" class="nav-item auth-link">Sign In</a>
-          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+          <a href="available-pets.html" class="nav-item auth-link">Available Pets</a>
         </nav>
       </header>
 
@@ -37,7 +36,7 @@
               <span>Find Your Match</span>
             </a>
 
-            <a href="#" class="nav-item nav-pill nav-pill-outline">
+            <a href="available-pets.html" class="nav-item nav-pill nav-pill-outline">
               <span class="nav-icon" aria-hidden="true">🐾</span>
               <span>Available Pets</span>
             </a>
@@ -51,7 +50,35 @@
       </main>
     </div>
 
+    <section class="account-overlay" aria-label="Account access">
+      <div class="account-overlay-card">
+        <button class="account-overlay-close" type="button" aria-label="Continue without an account">×</button>
+        <p class="account-overlay-warning" role="alert">If you continue without an account you will not be able to save your data on this website.</p>
+        <h2>Create an Account or Sign In</h2>
+        <div class="account-overlay-actions">
+          <a class="account-overlay-button" href="sign-in.html">Sign In</a>
+          <span class="account-overlay-divider">or</span>
+          <a class="account-overlay-button account-overlay-button-primary" href="create-account.html">Create an Account</a>
+        </div>
+      </div>
+    </section>
+
     <script>
+      const accountOverlay = document.querySelector(".account-overlay");
+      const accountOverlayClose = document.querySelector(".account-overlay-close");
+      const accountOverlayWarning = document.querySelector(".account-overlay-warning");
+      let warningShown = false;
+
+      accountOverlayClose.addEventListener("click", () => {
+        if (!warningShown) {
+          warningShown = true;
+          accountOverlayWarning.classList.add("is-visible");
+          return;
+        }
+
+        accountOverlay.remove();
+      });
+
       localStorage.removeItem("selectedPath");
       localStorage.removeItem("selectedPet");
       localStorage.removeItem("selectedGender");

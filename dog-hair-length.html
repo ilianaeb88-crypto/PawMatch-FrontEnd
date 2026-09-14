@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Choose Dog Hair Length</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page dog-hair-length-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#" class="nav-item">Profile</a>
+          <a href="#" class="nav-item">Questionnaire</a>
+          <a href="#" class="nav-item">Best Matches</a>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+
+      <main class="choice-bubble">
+        <h1>Would You Prefer a Long or Short Haired Dog?</h1>
+
+        <div class="choice-options" role="list">
+          <button class="choice-option choice-option-primary" type="button" data-choice="long-hair">Long-Hair</button>
+          <button class="choice-option choice-option-secondary" type="button" data-choice="short-hair">Short-Hair</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="no-preference">No Preference</button>
+        </div>
+
+        <a class="back-button" href="dog-breed.html">Back</a>
+      </main>
+    </div>
+
+    <script>
+      const hairLengthButtons = document.querySelectorAll(".choice-option");
+      const savedHairLength = localStorage.getItem("selectedDogHairLength");
+
+      hairLengthButtons.forEach((button) => {
+        if (button.dataset.choice === savedHairLength) {
+          button.classList.add("is-selected");
+        }
+
+        button.addEventListener("click", () => {
+          hairLengthButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedDogHairLength", button.dataset.choice);
+          window.location.href = "dog-activity-level.html";
+        });
+      });
+    </script>
+  </body>
+</html>

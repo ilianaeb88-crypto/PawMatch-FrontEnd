@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Questionnaire Complete</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page questionnaire-complete-page">
+    <div class="choice-shell">
+      <main class="choice-bubble completion-bubble">
+        <h1>You Have Completed the Questionnaire!</h1>
+        <p>Click Anywhere to Continue</p>
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener("click", () => {
+        window.location.href = "match-results.html";
+      });
+    </script>
+  </body>
+</html>

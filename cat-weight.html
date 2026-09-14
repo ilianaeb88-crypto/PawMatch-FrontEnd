@@ -52,6 +52,7 @@
           weightButtons.forEach((btn) => btn.classList.remove("is-selected"));
           button.classList.add("is-selected");
           localStorage.setItem("selectedCatWeight", button.dataset.choice);
+          window.location.href = "cat-breed.html";
         });
       });
     </script>

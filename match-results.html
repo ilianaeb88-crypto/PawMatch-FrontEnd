@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Your Matches</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page match-results-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#" class="nav-item">Profile</a>
+          <a href="#" class="nav-item">Questionnaire</a>
+          <a href="#" class="nav-item">Best Matches</a>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+
+      <main class="matches-content">
+        <div class="matches-heading">
+          <p class="matches-eyebrow">PAWMATCH RESULTS</p>
+          <h1>Your Best Matches</h1>
+          <p>Meet the animals who line up closest with your answers.</p>
+        </div>
+
+        <section class="profile-grid" aria-label="Animal matches">
+          <article class="profile-card" data-profile="milo" tabindex="0">
+            <div class="profile-image-wrap">
+              <img src="src/assets/image copy 4.png" alt="Milo, a Border Collie mix" class="profile-image profile-dog" />
+              <span class="match-score">98% Match</span>
+            </div>
+            <div class="profile-details">
+              <h2>Milo</h2>
+              <p class="profile-type">German Shepherd</p>
+              <dl class="profile-facts">
+                <div><dt>Gender</dt><dd>Male</dd></div>
+                <div><dt>Age</dt><dd>3 years</dd></div>
+              </dl>
+            </div>
+          </article>
+
+          <article class="profile-card" data-profile="luna" tabindex="0">
+            <div class="profile-image-wrap">
+              <img src="src/assets/image copy 3.png" alt="Luna, a tabby cat" class="profile-image profile-cat" />
+              <span class="match-score">95% Match</span>
+            </div>
+            <div class="profile-details">
+              <h2>Luna</h2>
+              <p class="profile-type">Domestic Shorthair</p>
+              <dl class="profile-facts">
+                <div><dt>Gender</dt><dd>Female</dd></div>
+                <div><dt>Age</dt><dd>2 years</dd></div>
+              </dl>
+            </div>
+          </article>
+
+          <article class="profile-card" data-profile="bear" tabindex="0">
+            <div class="profile-image-wrap">
+              <img src="src/assets/image copy 5.png" alt="Bear, a Corgi mix" class="profile-image profile-dog" />
+              <span class="match-score">91% Match</span>
+            </div>
+            <div class="profile-details">
+              <h2>Bear</h2>
+              <p class="profile-type">Shepherd Mix</p>
+              <dl class="profile-facts">
+                <div><dt>Gender</dt><dd>Male</dd></div>
+                <div><dt>Age</dt><dd>5 years</dd></div>
+              </dl>
+            </div>
+          </article>
+
+          <article class="profile-card" data-profile="cleo" tabindex="0">
+            <div class="profile-image-wrap">
+              <img src="src/assets/image copy 2.png" alt="Cleo, a tabby cat" class="profile-image profile-cat" />
+              <span class="match-score">88% Match</span>
+            </div>
+            <div class="profile-details">
+              <h2>Cleo</h2>
+              <p class="profile-type">Calico</p>
+              <dl class="profile-facts">
+                <div><dt>Gender</dt><dd>Female</dd></div>
+                <div><dt>Age</dt><dd>4 years</dd></div>
+              </dl>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script>
+      document.querySelectorAll(".profile-card").forEach((card) => {
+        const openProfile = () => {
+          window.location.href = `pet-profile.html?pet=${card.dataset.profile}`;
+        };
+
+        card.addEventListener("click", openProfile);
+        card.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openProfile();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

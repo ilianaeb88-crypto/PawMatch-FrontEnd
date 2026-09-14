@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Choose Dog Activity Level</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page dog-activity-level-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#" class="nav-item">Profile</a>
+          <a href="#" class="nav-item">Questionnaire</a>
+          <a href="#" class="nav-item">Best Matches</a>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+
+      <main class="choice-bubble">
+        <h1>How Active Would You Like Your Dog to Be?</h1>
+
+        <div class="choice-options" role="list">
+          <button class="choice-option choice-option-primary" type="button" data-choice="very-active">Very Active</button>
+          <button class="choice-option choice-option-secondary" type="button" data-choice="moderately-active">Moderately Active</button>
+          <button class="choice-option choice-option-primary" type="button" data-choice="non-active">Non-Active</button>
+          <button class="choice-option choice-option-secondary" type="button" data-choice="no-preference">No Preference</button>
+        </div>
+
+        <a class="back-button" href="dog-breed.html">Back</a>
+      </main>
+    </div>
+
+    <script>
+      const activityButtons = document.querySelectorAll(".choice-option");
+      const savedActivity = localStorage.getItem("selectedDogActivity");
+
+      activityButtons.forEach((button) => {
+        if (button.dataset.choice === savedActivity) {
+          button.classList.add("is-selected");
+        }
+
+        button.addEventListener("click", () => {
+          activityButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedDogActivity", button.dataset.choice);
+          window.location.href = "dog-house-training.html";
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Compatibility</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page compatibility-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="match-results.html" class="nav-item">Best Matches</a>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+
+      <main class="compatibility-layout" id="compatibility-profile">
+        <section class="compatibility-facts">
+          <h2 id="compatibility-name"></h2>
+          <div class="comparison-header"><span>Your Answer</span><span>Pet Characteristic</span></div>
+          <div class="comparison-list" id="comparison-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const compatibilityProfiles = {
+        milo: { name: "Milo", image: "src/assets/image copy 4.png", score: "98% Match", traits: { Breed: "Border Collie Mix", Age: "3 Years Old", Gender: "Male", Size: "Medium", Activity: "Very Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Social" } },
+        luna: { name: "Luna", image: "src/assets/image copy 3.png", score: "95% Match", traits: { Breed: "Domestic Shorthair", Age: "2 Years Old", Gender: "Female", Size: "Small - 8lb", Activity: "Moderately Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Reserved" } },
+        bear: { name: "Bear", image: "src/assets/image copy 5.png", score: "91% Match", traits: { Breed: "Corgi Mix", Age: "5 Years Old", Gender: "Male", Size: "Medium", Activity: "Moderately Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Social" } },
+        cleo: { name: "Cleo", image: "src/assets/image copy 2.png", score: "88% Match", traits: { Breed: "Calico", Age: "4 Years Old", Gender: "Female", Size: "Small - 9lb", Activity: "Non-Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Reserved" } }
+      };
+
+      const answerLabels = {
+        selectedGender: { label: "Gender", values: { male: "Male", female: "Female", any: "No Preference" } },
+        selectedAge: { label: "Age", values: { "less-than-6-months": "0-1 (Baby)", "1-3": "1-3 (Young)", "3-7": "3-7 (Adult)", "greater-than-7": "Greater than 7 (Senior)" } },
+        selectedDogBreed: { label: "Breed" }, selectedCatBreed: { label: "Breed" },
+        selectedDogActivity: { label: "Activity", values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active" } },
+        selectedCatActivity: { label: "Activity", values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active" } },
+        selectedDogHouseTraining: { label: "House Trained", values: { yes: "Yes", no: "No Preference" } },
+        selectedCatHouseTraining: { label: "House Trained", values: { yes: "Yes", no: "No Preference" } },
+        selectedDogDisability: { label: "Disability", values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" } },
+        selectedCatDisability: { label: "Disability", values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" } },
+        selectedDogPersonality: { label: "Personality", values: { social: "Social", reserved: "Reserved" } },
+        selectedCatPersonality: { label: "Personality", values: { social: "Social", reserved: "Reserved" } }
+      };
+
+      const petId = new URLSearchParams(window.location.search).get("pet") || "milo";
+      const profile = compatibilityProfiles[petId] || compatibilityProfiles.milo;
+      document.title = `Pawmatch - ${profile.name} Compatibility`;
+      document.querySelector("#compatibility-name").textContent = profile.name;
+
+      const comparisons = [
+        ...Object.entries(answerLabels).map(([key, definition]) => ({ key, label: definition.label, value: localStorage.getItem(key), values: definition.values }))
+      ].filter((comparison) => comparison.value && comparison.value !== "No Preference" && comparison.value !== "any" && comparison.value !== "no-preference");
+
+      const comparisonList = document.querySelector("#comparison-list");
+      comparisons.forEach((comparison) => {
+        const row = document.createElement("div");
+        const answer = comparison.values?.[comparison.value] || comparison.value.replaceAll("-", " ");
+        const characteristic = profile.traits[comparison.label] || "See profile";
+        row.className = "comparison-row";
+        row.innerHTML = `<strong>${comparison.label}</strong><span>${answer}</span><span>${characteristic}</span>`;
+        comparisonList.append(row);
+      });
+    </script>
+  </body>
+</html>

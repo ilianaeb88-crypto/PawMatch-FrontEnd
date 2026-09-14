@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Choose Cat Breed</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page breed-choice-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#" class="nav-item">Profile</a>
+          <a href="#" class="nav-item">Questionnaire</a>
+          <a href="#" class="nav-item">Best Matches</a>
+          <a href="#" class="nav-item auth-link">Sign In</a>
+          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+
+      <main class="choice-bubble">
+        <h1>What Cat Breed Would You Prefer?</h1>
+
+        <label class="breed-label" for="cat-breed">Select a breed</label>
+        <div class="breed-dropdown">
+        <select class="breed-select" id="cat-breed">
+          <option value="" disabled selected>Choose a cat breed</option>
+          <option>Abyssinian</option>
+          <option>American Bobtail</option>
+          <option>American Curl</option>
+          <option>American Shorthair</option>
+          <option>American Wirehair</option>
+          <option>Australian Mist</option>
+          <option>Balinese</option>
+          <option>Bengal</option>
+          <option>Birman</option>
+          <option>Bombay</option>
+          <option>British Shorthair</option>
+          <option>Burmese</option>
+          <option>Burmilla</option>
+          <option>Chartreux</option>
+          <option>Colorpoint Shorthair</option>
+          <option>Cornish Rex</option>
+          <option>Cymric</option>
+          <option>Devon Rex</option>
+          <option>Egyptian Mau</option>
+          <option>European Shorthair</option>
+          <option>Exotic Shorthair</option>
+          <option>Havana Brown</option>
+          <option>Himalayan</option>
+          <option>Japanese Bobtail</option>
+          <option>Javanese</option>
+          <option>Korat</option>
+          <option>LaPerm</option>
+          <option>Maine Coon</option>
+          <option>Manx</option>
+          <option>Munchkin</option>
+          <option>Nebelung</option>
+          <option>Norwegian Forest Cat</option>
+          <option>Ocicat</option>
+          <option>Oriental Shorthair</option>
+          <option>Persian</option>
+          <option>Peterbald</option>
+          <option>Ragamuffin</option>
+          <option>Ragdoll</option>
+          <option>Russian Blue</option>
+          <option>Safari</option>
+          <option>Savannah</option>
+          <option>Scottish Fold</option>
+          <option>Selkirk Rex</option>
+          <option>Siamese</option>
+          <option>Siberian</option>
+          <option>Singapura</option>
+          <option>Somali</option>
+          <option>Sphynx</option>
+          <option>Thai</option>
+          <option>Tonkinese</option>
+          <option>Turkish Angora</option>
+          <option>Turkish Van</option>
+          <option>Mixed Breed</option>
+          <option>No Preference</option>
+        </select>
+        </div>
+
+        <a class="back-button" href="cat-weight.html">Back</a>
+      </main>
+    </div>
+
+    <script>
+      const breedSelect = document.querySelector("#cat-breed");
+      const breedDropdown = breedSelect.closest(".breed-dropdown");
+      const breedTrigger = document.createElement("button");
+      const breedMenu = document.createElement("div");
+      const savedBreed = localStorage.getItem("selectedCatBreed");
+
+      if (savedBreed) {
+        breedSelect.value = savedBreed;
+      }
+
+      breedTrigger.className = "breed-trigger";
+      breedTrigger.type = "button";
+      breedTrigger.textContent = breedSelect.value || "Choose a cat breed";
+      breedMenu.className = "breed-menu";
+      breedMenu.hidden = true;
+
+      Array.from(breedSelect.options).forEach((option) => {
+        if (option.disabled) return;
+        const optionButton = document.createElement("button");
+        optionButton.className = "breed-menu-option";
+        optionButton.type = "button";
+        optionButton.textContent = option.textContent;
+        optionButton.addEventListener("click", () => {
+          breedSelect.value = option.value;
+          breedTrigger.textContent = option.textContent;
+          breedMenu.hidden = true;
+          localStorage.setItem("selectedCatBreed", breedSelect.value);
+          window.location.href = breedSelect.value === "No Preference"
+            ? "cat-hair-length.html"
+            : "cat-activity-level.html";
+        });
+        breedMenu.append(optionButton);
+      });
+
+      breedDropdown.prepend(breedTrigger);
+      breedDropdown.append(breedMenu);
+      breedTrigger.addEventListener("click", () => {
+        breedMenu.hidden = !breedMenu.hidden;
+      });
+      document.addEventListener("click", (event) => {
+        if (!breedDropdown.contains(event.target)) breedMenu.hidden = true;
+      });
+    </script>
+  </body>
+</html>

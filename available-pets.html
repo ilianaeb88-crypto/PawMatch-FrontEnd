@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Available Pets</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page available-pets-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand"><span class="brand-icon" aria-hidden="true">🐾</span><span class="brand-name">Pawmatch</span></a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="available-pets.html" class="nav-item">Available Pets</a>
+          <a href="adoption-choice.html" class="nav-item">Questionnaire</a>
+        </nav>
+      </header>
+
+      <main class="available-pets-content">
+        <section class="pet-search-bar" aria-label="Search and filter available pets">
+          <label class="pet-search-field">
+            <span aria-hidden="true">⌕</span>
+            <input id="pet-search" type="search" placeholder="Search by name" />
+          </label>
+          <select data-filter="path" aria-label="Adoption or foster"><option value="">Adoption or Foster</option><option>Adoption</option><option>Foster</option></select>
+          <select data-filter="animal" aria-label="Cat or dog"><option value="">Cat or Dog</option><option>Cat</option><option>Dog</option></select>
+          <select data-filter="breed" aria-label="Breed"><option value="">Breed</option><option>Scottish-Fold</option><option>British Shorthair</option><option>Pug</option><option>Labrador Retriever</option></select>
+          <select data-filter="center" aria-label="Adoption center"><option value="">Adoption Center</option><option>SPCA</option><option>Paws & Paths Rescue</option><option>Second Chance Animal Care</option></select>
+          <select data-filter="gender" aria-label="Gender"><option value="">Gender</option><option>Female</option><option>Male</option></select>
+          <button id="liked-filter" class="liked-filter" type="button" aria-pressed="false">Liked</button>
+        </section>
+
+        <section class="available-pet-grid" id="available-pet-grid" aria-label="Available pets">
+          <article class="available-pet-card" data-name="Kylar" data-animal="Cat" data-breed="British Shorthair" data-gender="Male" data-liked="false">
+            <button class="pet-like" type="button" aria-label="Like Kylar" aria-pressed="false">♡</button>
+            <img src="src/assets/image copy 3.png" alt="Kylar, a British Shorthair cat" />
+            <div class="available-pet-meta"><strong>Kylar</strong><span>Male</span><span>Years Old</span><span>British Shorthair</span></div>
+          </article>
+          <article class="available-pet-card" data-name="Sayana" data-animal="Dog" data-breed="Pug" data-gender="Female" data-liked="false">
+            <button class="pet-like" type="button" aria-label="Like Sayana" aria-pressed="false">♡</button>
+            <img src="src/assets/image copy 5.png" alt="Sayana, a pug" />
+            <div class="available-pet-meta"><strong>Sayana</strong><span>Female</span><span>2 Years Old</span><span>Pug</span></div>
+          </article>
+          <article class="available-pet-card" data-name="Jarl" data-animal="Dog" data-breed="Labrador Retriever" data-gender="Male" data-liked="false">
+            <button class="pet-like" type="button" aria-label="Like Jarl" aria-pressed="false">♡</button>
+            <img src="src/assets/image copy 4.png" alt="Jarl, a Labrador Retriever" />
+            <div class="available-pet-meta"><strong>Jarl</strong><span>Male</span><span>1 Year Old</span><span>Labrador Retriever</span></div>
+          </article>
+        </section>
+        <a class="profile-return available-return" href="index.html">Return</a>
+      </main>
+    </div>
+
+    <script>
+      const cards = [...document.querySelectorAll(".available-pet-card")];
+      const search = document.querySelector("#pet-search");
+      const likedFilter = document.querySelector("#liked-filter");
+      const filters = [...document.querySelectorAll("[data-filter]")];
+
+      function applyFilters() {
+        const query = search.value.trim().toLowerCase();
+        const likedOnly = likedFilter.getAttribute("aria-pressed") === "true";
+        cards.forEach((card) => {
+          const matchesSearch = !query || card.dataset.name.toLowerCase().includes(query);
+          const matchesFilters = filters.every((filter) => !filter.value || card.dataset[filter.dataset.filter] === filter.value);
+          const matchesLiked = !likedOnly || card.dataset.liked === "true";
+          card.hidden = !(matchesSearch && matchesFilters && matchesLiked);
+        });
+      }
+
+      search.addEventListener("input", applyFilters);
+      filters.forEach((filter) => filter.addEventListener("change", applyFilters));
+      likedFilter.addEventListener("click", () => {
+        const isLiked = likedFilter.getAttribute("aria-pressed") !== "true";
+        likedFilter.setAttribute("aria-pressed", String(isLiked));
+        applyFilters();
+      });
+      document.querySelectorAll(".pet-like").forEach((button) => {
+        button.addEventListener("click", () => {
+          const card = button.closest(".available-pet-card");
+          const liked = button.getAttribute("aria-pressed") !== "true";
+          button.setAttribute("aria-pressed", String(liked));
+          button.textContent = liked ? "♥" : "♡";
+          card.dataset.liked = String(liked);
+          applyFilters();
+        });
+      });
+    </script>
+  </body>
+</html>

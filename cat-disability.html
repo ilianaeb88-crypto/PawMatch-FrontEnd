@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Choose Cat Disability Preference</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page cat-disability-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="index.html" class="brand"><span class="brand-icon" aria-hidden="true">🐾</span><span class="brand-name">Pawmatch</span></a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#" class="nav-item">Profile</a><a href="#" class="nav-item">Questionnaire</a><a href="#" class="nav-item">Best Matches</a><a href="#" class="nav-item auth-link">Sign In</a><a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+        </nav>
+      </header>
+      <main class="choice-bubble">
+        <h1>Do You Care if Your Cat is Disabled?</h1>
+        <div class="choice-options" role="list">
+          <button class="choice-option choice-option-primary" type="button" data-choice="not-disabled">I Don't Want a Disabled Cat</button>
+          <button class="choice-option choice-option-secondary" type="button" data-choice="any-disability">I Don't Care About Having a Disabled Cat or Not</button>
+        </div>
+        <a class="back-button" href="cat-house-training.html">Back</a>
+      </main>
+    </div>
+    <script>
+      const disabilityButtons = document.querySelectorAll(".choice-option");
+      const savedDisability = localStorage.getItem("selectedCatDisability");
+      disabilityButtons.forEach((button) => {
+        if (button.dataset.choice === savedDisability) button.classList.add("is-selected");
+        button.addEventListener("click", () => {
+          disabilityButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedCatDisability", button.dataset.choice);
+          window.location.href = "cat-hypoallergenic.html";
+        });
+      });
+    </script>
+  </body>
+</html>

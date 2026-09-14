@@ -27,6 +27,7 @@
         <h1>What Breed of Dog are You Looking For?</h1>
 
         <label class="breed-label" for="dog-breed">Select a breed</label>
+        <div class="breed-dropdown">
         <select class="breed-select" id="dog-breed">
           <option value="" disabled selected>Choose a dog breed</option>
           <option>Afghan Hound</option>
@@ -151,6 +152,7 @@
           <option>Mixed Breed</option>
           <option>No Preference</option>
         </select>
+        </div>
 
         <a class="back-button" href="pet-weight.html">Back</a>
       </main>
@@ -158,14 +160,46 @@
 
     <script>
       const breedSelect = document.querySelector("#dog-breed");
+      const breedDropdown = breedSelect.closest(".breed-dropdown");
+      const breedTrigger = document.createElement("button");
+      const breedMenu = document.createElement("div");
       const savedBreed = localStorage.getItem("selectedDogBreed");
 
       if (savedBreed) {
         breedSelect.value = savedBreed;
       }
 
-      breedSelect.addEventListener("change", () => {
-        localStorage.setItem("selectedDogBreed", breedSelect.value);
+      breedTrigger.className = "breed-trigger";
+      breedTrigger.type = "button";
+      breedTrigger.textContent = breedSelect.value || "Choose a dog breed";
+      breedMenu.className = "breed-menu";
+      breedMenu.hidden = true;
+
+      Array.from(breedSelect.options).forEach((option) => {
+        if (option.disabled) return;
+        const optionButton = document.createElement("button");
+        optionButton.className = "breed-menu-option";
+        optionButton.type = "button";
+        optionButton.textContent = option.textContent;
+        optionButton.addEventListener("click", () => {
+          breedSelect.value = option.value;
+          breedTrigger.textContent = option.textContent;
+          breedMenu.hidden = true;
+          localStorage.setItem("selectedDogBreed", breedSelect.value);
+          window.location.href = breedSelect.value === "No Preference"
+            ? "dog-hair-length.html"
+            : "dog-activity-level.html";
+        });
+        breedMenu.append(optionButton);
+      });
+
+      breedDropdown.prepend(breedTrigger);
+      breedDropdown.append(breedMenu);
+      breedTrigger.addEventListener("click", () => {
+        breedMenu.hidden = !breedMenu.hidden;
+      });
+      document.addEventListener("click", (event) => {
+        if (!breedDropdown.contains(event.target)) breedMenu.hidden = true;
       });
     </script>
   </body>

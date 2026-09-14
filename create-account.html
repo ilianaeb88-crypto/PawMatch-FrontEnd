@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Create an Account</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="account-page">
+    <div class="account-page-shell">
+      <header class="topbar account-page-topbar">
+        <a href="index.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+        <a href="index.html" class="account-back-link">Back to Home</a>
+      </header>
+
+      <main class="account-form-card">
+        <p class="account-eyebrow">PAWMATCH</p>
+        <h1>Create an Account</h1>
+        <p class="account-intro">Save your questionnaire answers and keep track of your favorite pets.</p>
+
+        <form class="account-form" action="match-results.html">
+          <label for="account-name">Name</label>
+          <input id="account-name" name="name" type="text" autocomplete="name" required />
+
+          <label for="account-email">Email</label>
+          <input id="account-email" name="email" type="email" autocomplete="email" required />
+
+          <label for="account-password">Password</label>
+          <input id="account-password" name="password" type="password" autocomplete="new-password" required />
+
+          <label for="account-confirm-password">Confirm Password</label>
+          <input id="account-confirm-password" name="confirm-password" type="password" autocomplete="new-password" required />
+
+          <button type="submit">Create an Account</button>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>
