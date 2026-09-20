@@ -23,7 +23,7 @@
 
       <main class="choice-bubble ranking-bubble">
         <h1>Rank Your Answers Based On Their Importance 1-15</h1>
-        <div class="rank-number-strip" id="rank-number-strip" aria-label="Choose an importance rank"></div>
+        <p class="ranking-instructions">Drag each answer into order, with the most important answer at the top.</p>
         <div class="ranking-list" id="ranking-list"></div>
         <a class="back-button" href="children-other-pets.html">Back</a>
         <a class="back-button done-button" href="questionnaire-complete.html">Done</a>
@@ -61,26 +61,6 @@
       const noPreferenceValues = new Set(["any", "no-preference", "No Preference", "no preference"]);
       const rankingList = document.querySelector("#ranking-list");
       const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
-      let activeAnswerKey = null;
-      const rankNumberStrip = document.querySelector("#rank-number-strip");
-
-      Array.from({ length: 15 }, (_, index) => index + 1).forEach((rank) => {
-        const rankButton = document.createElement("button");
-        rankButton.className = "rank-number";
-        rankButton.type = "button";
-        rankButton.textContent = rank;
-        rankButton.addEventListener("click", () => {
-          if (!activeAnswerKey) return;
-          savedRanks[activeAnswerKey] = rank;
-          localStorage.setItem("answerRanks", JSON.stringify(savedRanks));
-          const activeItem = document.querySelector(`[data-answer-key="${activeAnswerKey}"]`);
-          activeItem.querySelector(".rank-value").textContent = rank;
-          activeItem.classList.remove("is-active");
-          rankNumberStrip.querySelectorAll(".rank-number").forEach((button) => button.classList.remove("is-active"));
-          activeAnswerKey = null;
-        });
-        rankNumberStrip.append(rankButton);
-      });
 
       function getAnswerLabel(definition, value) {
         if (definition.values && definition.values[value]) return definition.values[value];
@@ -99,24 +79,58 @@
           answerLabel: getAnswerLabel(definition, definition.value),
         }));
 
+      answers.sort((first, second) => (savedRanks[first.key] || 99) - (savedRanks[second.key] || 99));
+
+      function saveRanks() {
+        rankingList.querySelectorAll(".rank-item").forEach((item, index) => {
+          savedRanks[item.dataset.answerKey] = index + 1;
+          item.querySelector(".rank-value").textContent = index + 1;
+        });
+        localStorage.setItem("answerRanks", JSON.stringify(savedRanks));
+      }
+
+      function updateDropTarget(target, draggedItem) {
+        const targetBox = target.getBoundingClientRect();
+        const insertBefore = draggedItem.clientY < targetBox.top + targetBox.height / 2;
+        rankingList.insertBefore(draggedItem.item, insertBefore ? target : target.nextSibling);
+        saveRanks();
+      }
+
       answers.forEach((answer) => {
         const item = document.createElement("div");
         item.className = "rank-item";
         item.dataset.answerKey = answer.key;
-        item.innerHTML = `<div class="rank-answer">
-            <button class="rank-answer-button" type="button">${answer.answerLabel}</button>
-            <span class="rank-value" aria-label="Assigned rank">${savedRanks[answer.key] || ""}</span>
-          </div>`;
+        item.draggable = true;
+        item.innerHTML = `<span class="rank-value" aria-label="Importance rank"></span>
+          <span class="rank-answer">${answer.answerLabel}</span>
+          <span class="rank-drag-handle" aria-hidden="true">☷</span>`;
 
-        item.querySelector(".rank-answer-button").addEventListener("click", () => {
-          document.querySelectorAll(".rank-item").forEach((answerItem) => answerItem.classList.remove("is-active"));
-          rankNumberStrip.querySelectorAll(".rank-number").forEach((button) => button.classList.remove("is-active"));
-          item.classList.add("is-active");
-          activeAnswerKey = answer.key;
+        item.addEventListener("dragstart", (event) => {
+          item.classList.add("is-dragging");
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", answer.key);
+        });
+        item.addEventListener("dragend", () => {
+          item.classList.remove("is-dragging");
+          document.querySelectorAll(".rank-item").forEach((rankItem) => rankItem.classList.remove("is-drop-target"));
+        });
+        item.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          if (item !== document.querySelector(".is-dragging")) item.classList.add("is-drop-target");
+        });
+        item.addEventListener("dragleave", () => item.classList.remove("is-drop-target"));
+        item.addEventListener("drop", (event) => {
+          event.preventDefault();
+          const draggedItem = document.querySelector(".is-dragging");
+          if (!draggedItem || draggedItem === item) return;
+          updateDropTarget(item, { item: draggedItem, clientY: event.clientY });
+          item.classList.remove("is-drop-target");
         });
 
         rankingList.append(item);
       });
+
+      saveRanks();
 
       if (!answers.length) {
         rankingList.innerHTML = "<p class=\"ranking-empty\">No ranked answers are available yet.</p>";
