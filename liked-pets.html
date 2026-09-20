@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Liked Pets</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page match-results-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="home.html" class="brand"><span class="brand-icon" aria-hidden="true">🐾</span><span class="brand-name">Pawmatch</span></a>
+        <nav class="nav-links" aria-label="Primary navigation"><a href="profile.html" class="nav-item">Profile</a><a href="available-pets.html" class="nav-item">Available Pets</a></nav>
+      </header>
+      <main class="matches-content">
+        <div class="matches-heading"><p class="matches-eyebrow">PAWMATCH</p><h1>Liked Pets</h1><p>Pets you saved for a closer look.</p></div>
+        <section class="profile-grid" id="liked-pet-grid" aria-label="Liked pets"></section>
+      </main>
+    </div>
+    <script>
+      const likedPets = {
+        luna: { name: "Luna", breed: "Domestic Shorthair", image: "src/assets/image copy 3.png", gender: "Female", age: "2 years" },
+        bear: { name: "Bear", breed: "Corgi Mix", image: "src/assets/image copy 5.png", gender: "Male", age: "5 years" },
+        cleo: { name: "Cleo", breed: "Calico", image: "src/assets/image copy 2.png", gender: "Female", age: "4 years" }
+      };
+      const liked = JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
+      const grid = document.querySelector("#liked-pet-grid");
+      liked.map((id) => likedPets[id]).filter(Boolean).forEach((pet) => {
+        const card = document.createElement("article");
+        card.className = "profile-card";
+        card.tabIndex = 0;
+        card.innerHTML = `<div class="profile-image-wrap"><img src="${pet.image}" alt="${pet.name}, ${pet.breed}" class="profile-image" /></div><div class="profile-details"><h2>${pet.name}</h2><p class="profile-type">${pet.breed}</p><dl class="profile-facts"><div><dt>Gender</dt><dd>${pet.gender}</dd></div><div><dt>Age</dt><dd>${pet.age}</dd></div></dl></div>`;
+        card.addEventListener("click", () => { window.location.href = `pet-profile.html?pet=${likedPets[pet.name.toLowerCase()] ? pet.name.toLowerCase() : "luna"}&from=available`; });
+        grid.append(card);
+      });
+      if (!grid.children.length) grid.innerHTML = "<p class=\"ranking-empty\">You have not liked any pets yet.</p>";
+    </script>
+  </body>
+</html>

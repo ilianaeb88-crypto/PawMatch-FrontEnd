@@ -9,14 +9,14 @@
   <body class="choice-page pet-profile-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
-        <a href="index.html" class="brand">
+        <a href="home.html" class="brand">
           <span class="brand-icon" aria-hidden="true">🐾</span>
           <span class="brand-name">Pawmatch</span>
         </a>
         <nav class="nav-links" aria-label="Primary navigation">
+          <a href="profile.html" class="nav-item">Profile</a>
           <a href="match-results.html" class="nav-item">Best Matches</a>
-          <a href="#" class="nav-item auth-link">Sign In</a>
-          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+          <a href="available-pets.html" class="nav-item available-pets-top-button">Available Pets</a>
         </nav>
       </header>
 
@@ -35,7 +35,7 @@
             <p><strong>Location:</strong> <span id="pet-location"></span></p>
             <p><strong>Hours:</strong> <span id="pet-hours"></span></p>
           </div>
-          <a class="profile-return" href="match-results.html">Return</a>
+            <a class="profile-return" id="profile-return" href="match-results.html">Return</a>
         </aside>
 
         <section class="pet-profile-facts">
@@ -46,6 +46,7 @@
           <div class="pet-fact"><strong>Size</strong><span id="pet-size"></span></div>
           <div class="pet-fact"><strong>Spayed/Neutered</strong><span id="pet-fixed"></span></div>
           <div class="pet-fact"><strong>House Trained</strong><span id="pet-trained"></span></div>
+          <div class="pet-fact"><strong>Available For</strong><span id="pet-path"></span></div>
         </section>
       </main>
     </div>
@@ -53,26 +54,33 @@
     <script>
       const profiles = {
         milo: {
-          name: "Milo", image: "src/assets/image copy 4.png", match: "98% Match", breed: "Border Collie Mix", age: "3 Years Old", gender: "Male", size: "Medium", fixed: "Yes", trained: "Yes", description: "Milo is an energetic, loyal companion who loves an active home.", shelter: "Paws & Paths Rescue", phone: "903-565-8899", email: "hello@pawsandpaths.org", location: "9854 County Road", hours: "10AM - 5PM"
+          name: "Milo", image: "src/assets/image copy 4.png", match: "98% Match", path: "Adoption", breed: "Border Collie Mix", age: "3 Years Old", gender: "Male", size: "Medium", fixed: "Yes", trained: "Yes", description: "Milo is an energetic, loyal companion who loves an active home.", shelter: "Paws & Paths Rescue", phone: "903-565-8899", email: "hello@pawsandpaths.org", location: "9854 County Road", hours: "10AM - 5PM"
         },
         luna: {
-          name: "Luna", image: "src/assets/image copy 3.png", match: "95% Match", breed: "Domestic Shorthair", age: "2 Years Old", gender: "Female", size: "Small - 8lb", fixed: "Yes", trained: "Yes", description: "Luna is a gentle, curious cat who enjoys sunny windows and quiet company.", shelter: "SPCA", phone: "903-565-8899", email: "spca@shelter.org", location: "9854 County Road", hours: "10AM - 5PM"
+          name: "Luna", image: "src/assets/image copy 3.png", match: "95% Match", path: "Adoption", breed: "Domestic Shorthair", age: "2 Years Old", gender: "Female", size: "Small - 8lb", fixed: "Yes", trained: "Yes", description: "Luna is a gentle, curious cat who enjoys sunny windows and quiet company.", shelter: "SPCA", phone: "903-565-8899", email: "spca@shelter.org", location: "9854 County Road", hours: "10AM - 5PM"
         },
         bear: {
-          name: "Bear", image: "src/assets/image copy 5.png", match: "91% Match", breed: "Corgi Mix", age: "5 Years Old", gender: "Male", size: "Medium", fixed: "Yes", trained: "Yes", description: "Bear is a friendly, steady dog ready to be part of a loving family.", shelter: "Second Chance Animal Care", phone: "903-565-8899", email: "adopt@secondchance.org", location: "9854 County Road", hours: "10AM - 5PM"
+          name: "Bear", image: "src/assets/image copy 5.png", match: "91% Match", path: "Foster", breed: "Corgi Mix", age: "5 Years Old", gender: "Male", size: "Medium", fixed: "Yes", trained: "Yes", description: "Bear is a friendly, steady dog ready to be part of a loving family.", shelter: "Second Chance Animal Care", phone: "903-565-8899", email: "adopt@secondchance.org", location: "9854 County Road", hours: "10AM - 5PM"
         },
         cleo: {
-          name: "Cleo", image: "src/assets/image copy 2.png", match: "88% Match", breed: "Calico", age: "4 Years Old", gender: "Female", size: "Small - 9lb", fixed: "Yes", trained: "Yes", description: "Cleo is a calm, affectionate cat who would thrive in a patient home.", shelter: "Whiskers Welcome", phone: "903-565-8899", email: "hello@whiskerswelcome.org", location: "9854 County Road", hours: "10AM - 5PM"
+          name: "Cleo", image: "src/assets/image copy 2.png", match: "88% Match", path: "Adoption", breed: "Calico", age: "4 Years Old", gender: "Female", size: "Small - 9lb", fixed: "Yes", trained: "Yes", description: "Cleo is a calm, affectionate cat who would thrive in a patient home.", shelter: "Whiskers Welcome", phone: "903-565-8899", email: "hello@whiskerswelcome.org", location: "9854 County Road", hours: "10AM - 5PM"
         }
       };
 
       const profile = profiles[new URLSearchParams(window.location.search).get("pet")] || profiles.milo;
+      const profileParams = new URLSearchParams(window.location.search);
       document.title = `Pawmatch - ${profile.name}`;
-      document.querySelector("#compatibility-link").href = `compatibility.html?pet=${new URLSearchParams(window.location.search).get("pet") || "milo"}`;
+      if (profileParams.get("from") === "available") {
+        document.querySelector("#compatibility-link").remove();
+          document.querySelector("#profile-return").href = "available-pets.html";
+      } else {
+        document.querySelector("#compatibility-link").href = `compatibility.html?pet=${profileParams.get("pet") || "milo"}`;
+      }
       document.querySelector("#pet-name").textContent = profile.name;
       document.querySelector("#pet-image").src = profile.image;
       document.querySelector("#pet-image").alt = `${profile.name}, ${profile.breed}`;
       document.querySelector("#pet-match").textContent = profile.match;
+      document.querySelector("#pet-path").textContent = profile.path;
       ["breed", "age", "gender", "size", "fixed", "trained", "description", "shelter", "phone", "email", "location", "hours"].forEach((key) => {
         document.querySelector(`#pet-${key}`).textContent = profile[key];
       });

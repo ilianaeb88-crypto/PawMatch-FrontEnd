@@ -3,82 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pawmatch</title>
+    <title>Pawmatch - Sign Up</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="page">
-      <header class="topbar">
-        <a href="#" class="brand">
-          <span class="brand-icon" aria-hidden="true">🐾</span>
-          <span class="brand-name">Pawmatch</span>
-        </a>
-
-        <nav class="nav-links" aria-label="Primary navigation">
-          <span class="nav-item">Profile</span>
-          <a href="adoption-choice.html" class="nav-item">Questionnaire</a>
-          <span class="nav-item">Best Matches</span>
-          <a href="available-pets.html" class="nav-item auth-link">Available Pets</a>
-        </nav>
-      </header>
-
-      <main class="hero">
-        <section class="hero-copy">
-          <h1>Every Pet Deserves a Loving Home</h1>
-          <p class="subheading">
-            Answer a detailed questionnaire about your preferences and lifestyle
-            to discover your perfect pet.
-          </p>
-
-          <div class="hero-actions">
-            <a href="adoption-choice.html" class="nav-item nav-pill">
-              <span class="nav-icon" aria-hidden="true">🔎</span>
-              <span>Find Your Match</span>
-            </a>
-
-            <a href="available-pets.html" class="nav-item nav-pill nav-pill-outline">
-              <span class="nav-icon" aria-hidden="true">🐾</span>
-              <span>Available Pets</span>
-            </a>
-          </div>
-        </section>
-
-        <div class="hero-media">
-          <img src="cat.png" class="cat-image" alt="Cat waiting to be adopted" />
-          <img src="dog-transparent.png" class="dog-image" alt="German Shepherd waiting to be adopted" />
-        </div>
-      </main>
-    </div>
-
     <section class="account-overlay" aria-label="Account access">
       <div class="account-overlay-card">
-        <button class="account-overlay-close" type="button" aria-label="Continue without an account">×</button>
-        <p class="account-overlay-warning" role="alert">If you continue without an account you will not be able to save your data on this website.</p>
-        <h2>Create an Account or Sign In</h2>
-        <div class="account-overlay-actions">
-          <a class="account-overlay-button" href="sign-in.html">Sign In</a>
-          <span class="account-overlay-divider">or</span>
-          <a class="account-overlay-button account-overlay-button-primary" href="create-account.html">Create an Account</a>
+        <div class="account-choice-content">
+          <p class="account-eyebrow">PAWMATCH</p>
+          <h2>Sign up</h2>
+          <p class="account-choice-intro">Create and account and begin your search for the perfect companion. <a href="sign-in.html">Log in here</a></p>
+          <form class="welcome-signup-form" action="create-account.html">
+            <label class="visually-hidden" for="welcome-email">Email address</label>
+            <input id="welcome-email" name="email" type="email" placeholder="Email address" autocomplete="email" required />
+            <button class="welcome-signup-button" type="submit">Sign Up</button>
+            <span class="welcome-form-divider">OR</span>
+            <button class="welcome-google-button" type="button"><span class="google-icon" aria-hidden="true">G</span>Continue with Google</button>
+          </form>
         </div>
       </div>
+      <aside class="account-choice-visual" aria-label="Pawmatch pet adoption">
+        <p class="account-choice-brand">Pawmatch</p>
+        <h3>Find the companion who fits your life.</h3>
+        <img src="dog-transparent.png" alt="Dog waiting to be adopted" />
+      </aside>
     </section>
 
     <script>
-      const accountOverlay = document.querySelector(".account-overlay");
-      const accountOverlayClose = document.querySelector(".account-overlay-close");
-      const accountOverlayWarning = document.querySelector(".account-overlay-warning");
-      let warningShown = false;
-
-      accountOverlayClose.addEventListener("click", () => {
-        if (!warningShown) {
-          warningShown = true;
-          accountOverlayWarning.classList.add("is-visible");
-          return;
-        }
-
-        accountOverlay.remove();
-      });
-
       localStorage.removeItem("selectedPath");
       localStorage.removeItem("selectedPet");
       localStorage.removeItem("selectedGender");

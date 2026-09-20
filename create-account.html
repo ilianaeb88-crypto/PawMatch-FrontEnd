@@ -9,11 +9,10 @@
   <body class="account-page">
     <div class="account-page-shell">
       <header class="topbar account-page-topbar">
-        <a href="index.html" class="brand">
+        <a href="home.html" class="brand">
           <span class="brand-icon" aria-hidden="true">🐾</span>
           <span class="brand-name">Pawmatch</span>
         </a>
-        <a href="index.html" class="account-back-link">Back to Home</a>
       </header>
 
       <main class="account-form-card">
@@ -21,7 +20,7 @@
         <h1>Create an Account</h1>
         <p class="account-intro">Save your questionnaire answers and keep track of your favorite pets.</p>
 
-        <form class="account-form" action="match-results.html">
+        <form class="account-form" id="create-account-form" action="home.html">
           <label for="account-name">Name</label>
           <input id="account-name" name="name" type="text" autocomplete="name" required />
 
@@ -29,14 +28,41 @@
           <input id="account-email" name="email" type="email" autocomplete="email" required />
 
           <label for="account-password">Password</label>
-          <input id="account-password" name="password" type="password" autocomplete="new-password" required />
+          <input id="account-password" name="password" type="password" autocomplete="new-password" minlength="8" required />
 
           <label for="account-confirm-password">Confirm Password</label>
-          <input id="account-confirm-password" name="confirm-password" type="password" autocomplete="new-password" required />
+          <input id="account-confirm-password" name="confirm-password" type="password" autocomplete="new-password" minlength="8" required />
 
           <button type="submit">Create an Account</button>
+          <a class="account-back-link" href="home.html">Back to Home</a>
         </form>
+        <p class="account-form-message" id="create-account-message" role="alert" aria-live="polite"></p>
       </main>
     </div>
+
+    <script>
+      const createAccountForm = document.querySelector("#create-account-form");
+      const createAccountMessage = document.querySelector("#create-account-message");
+
+      createAccountForm.addEventListener("submit", (event) => {
+        const password = document.querySelector("#account-password").value;
+        const confirmPassword = document.querySelector("#account-confirm-password").value;
+
+        if (password !== confirmPassword) {
+          event.preventDefault();
+          createAccountMessage.textContent = "Passwords do not match.";
+          document.querySelector("#account-confirm-password").focus();
+          return;
+        }
+
+        const account = {
+          name: document.querySelector("#account-name").value,
+          email: document.querySelector("#account-email").value.trim().toLowerCase(),
+          password
+        };
+
+        localStorage.setItem("pawmatchAccount", JSON.stringify(account));
+      });
+    </script>
   </body>
 </html>

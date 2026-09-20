@@ -17,7 +17,7 @@
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="#" class="nav-item">Profile</a>
           <a href="#" class="nav-item">Questionnaire</a>
-          <a href="#" class="nav-item">Best Matches</a>
+          <a href="available-pets.html" class="nav-item">Available Pets</a>
           <a href="#" class="nav-item auth-link">Sign In</a>
           <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
         </nav>
@@ -37,7 +37,7 @@
           <button class="choice-option choice-option-secondary" type="button" data-choice="no-preference">No Preference</button>
         </div>
 
-        <a class="back-button" href="dog-disability.html">Back</a>
+        <a class="back-button" href="dog-activity-level.html">Back</a>
       </main>
     </div>
 
@@ -54,7 +54,7 @@
           typeButtons.forEach((btn) => btn.classList.remove("is-selected"));
           button.classList.add("is-selected");
           localStorage.setItem("selectedDogType", button.dataset.choice);
-          window.location.href = "dog-protective.html";
+          window.location.href = "dog-barking.html";
         });
       });
     </script>

@@ -6,37 +6,74 @@
     <title>Pawmatch - Choose Cat Activity Level</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page cat-activity-level-page">
+  <body class="choice-page combined-questionnaire-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="index.html" class="brand"><span class="brand-icon" aria-hidden="true">🐾</span><span class="brand-name">Pawmatch</span></a>
         <nav class="nav-links" aria-label="Primary navigation">
-          <a href="#" class="nav-item">Profile</a><a href="#" class="nav-item">Questionnaire</a><a href="#" class="nav-item">Best Matches</a><a href="#" class="nav-item auth-link">Sign In</a><a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+          <a href="#" class="nav-item">Profile</a><a href="#" class="nav-item">Questionnaire</a><a href="available-pets.html" class="nav-item">Available Pets</a>
         </nav>
       </header>
-      <main class="choice-bubble">
-        <h1>How Active Would You Like Your Cat to Be?</h1>
-        <div class="choice-options" role="list">
-          <button class="choice-option choice-option-primary" type="button" data-choice="very-active">Very Active</button>
-          <button class="choice-option choice-option-secondary" type="button" data-choice="moderately-active">Moderately Active</button>
-          <button class="choice-option choice-option-primary" type="button" data-choice="non-active">Non-Active</button>
-          <button class="choice-option choice-option-secondary" type="button" data-choice="no-preference">No Preference</button>
-        </div>
-        <a class="back-button" href="cat-breed.html">Back</a>
+      <main class="combined-questionnaire">
+        <aside class="questionnaire-progress" aria-label="Questionnaire progress">
+          <h1>Your perfect match starts here.</h1>
+          <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="progress-fill"></span></div>
+          <p class="progress-count" id="progress-count">0% Complete</p>
+        </aside>
+        <section class="questionnaire-panel">
+          <h1>Tell Us More About Your Ideal Cat</h1>
+          <fieldset class="question-group"><legend>How active would you like your cat to be?</legend><div class="question-options question-options-four">
+            <button class="choice-option choice-option-primary" type="button" data-group="activity" data-choice="very-active">Very Active</button>
+            <button class="choice-option choice-option-secondary" type="button" data-group="activity" data-choice="moderately-active">Moderately Active</button>
+            <button class="choice-option choice-option-primary" type="button" data-group="activity" data-choice="non-active">Non-Active</button>
+            <button class="choice-option choice-option-secondary" type="button" data-group="activity" data-choice="no-preference">No Preference</button>
+          </div></fieldset>
+          <fieldset class="question-group"><legend>Do you care whether or not your cat is house trained?</legend><div class="question-options">
+            <button class="choice-option choice-option-primary" type="button" data-group="house-training" data-choice="yes">Yes</button>
+            <button class="choice-option choice-option-secondary" type="button" data-group="house-training" data-choice="no">No</button>
+          </div></fieldset>
+          <fieldset class="question-group"><legend>Would you prefer a social or reserved cat?</legend><div class="question-options question-options-three">
+            <button class="choice-option choice-option-primary" type="button" data-group="personality" data-choice="social">Social</button>
+            <button class="choice-option choice-option-secondary" type="button" data-group="personality" data-choice="reserved">Reserved</button>
+            <button class="choice-option choice-option-primary" type="button" data-group="personality" data-choice="no-preference">No Preference</button>
+          </div></fieldset>
+          <fieldset class="question-group"><legend>Do you care if your cat is disabled?</legend><div class="question-options">
+            <button class="choice-option choice-option-primary" type="button" data-group="disability" data-choice="not-disabled">Yes</button>
+            <button class="choice-option choice-option-secondary" type="button" data-group="disability" data-choice="any-disability">No</button>
+          </div></fieldset>
+          <div class="dog-breed-actions"><a class="back-button" href="cat-breed.html">Back</a><button class="questionnaire-next" id="cat-details-next" type="button" disabled>Next</button></div>
+        </section>
       </main>
     </div>
     <script>
-      const activityButtons = document.querySelectorAll(".choice-option");
-      const savedActivity = localStorage.getItem("selectedCatActivity");
-      activityButtons.forEach((button) => {
-        if (button.dataset.choice === savedActivity) button.classList.add("is-selected");
+      const choiceButtons = document.querySelectorAll(".choice-option");
+      const nextButton = document.querySelector("#cat-details-next");
+      const progressCount = document.querySelector("#progress-count");
+      const progressBar = document.querySelector(".progress-track");
+      const progressFill = document.querySelector(".progress-fill");
+      const storageKeys = { activity: "selectedCatActivity", "house-training": "selectedCatHouseTraining", personality: "selectedCatPersonality", disability: "selectedCatDisability" };
+      function refreshProgress() {
+        const answeredCount = Object.values(storageKeys).filter((key) => localStorage.getItem(key)).length;
+        const percentage = Math.round((answeredCount / 4) * 100);
+        progressCount.textContent = `${percentage}% Complete`;
+        progressBar.setAttribute("aria-valuenow", percentage);
+        progressFill.style.height = `${percentage}%`;
+        nextButton.disabled = answeredCount < 3;
+      }
+      choiceButtons.forEach((button) => {
+        const storageKey = storageKeys[button.dataset.group];
+        if (button.dataset.choice === localStorage.getItem(storageKey)) button.classList.add("is-selected");
         button.addEventListener("click", () => {
-          activityButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          document.querySelectorAll(`[data-group="${button.dataset.group}"]`).forEach((option) => option.classList.remove("is-selected"));
           button.classList.add("is-selected");
-          localStorage.setItem("selectedCatActivity", button.dataset.choice);
-          window.location.href = "cat-house-training.html";
+          localStorage.setItem(storageKey, button.dataset.choice);
+          refreshProgress();
         });
       });
+      nextButton.addEventListener("click", () => { if (!nextButton.disabled) window.location.href = "children-other-pets.html"; });
+      progressCount.textContent = "0% Complete";
+      progressBar.setAttribute("aria-valuenow", "0");
+      progressFill.style.height = "0%";
     </script>
   </body>
 </html>

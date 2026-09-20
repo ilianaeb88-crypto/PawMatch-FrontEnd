@@ -9,11 +9,10 @@
   <body class="account-page">
     <div class="account-page-shell">
       <header class="topbar account-page-topbar">
-        <a href="index.html" class="brand">
+        <a href="home.html" class="brand">
           <span class="brand-icon" aria-hidden="true">🐾</span>
           <span class="brand-name">Pawmatch</span>
         </a>
-        <a href="index.html" class="account-back-link">Back to Home</a>
       </header>
 
       <main class="account-form-card">
@@ -21,16 +20,35 @@
         <h1>Sign In</h1>
         <p class="account-intro">Sign in to access your saved questionnaire answers and favorite pets.</p>
 
-        <form class="account-form" action="match-results.html">
+        <form class="account-form" id="sign-in-form" action="home.html">
           <label for="sign-in-email">Email</label>
           <input id="sign-in-email" name="email" type="email" autocomplete="email" required />
 
           <label for="sign-in-password">Password</label>
           <input id="sign-in-password" name="password" type="password" autocomplete="current-password" required />
+          <a class="forgot-password-link" href="#">Forgot your password?</a>
 
           <button type="submit">Sign In</button>
+          <a class="account-back-link" href="home.html">Back to Home</a>
         </form>
+        <p class="account-form-message" id="sign-in-message" role="alert" aria-live="polite"></p>
       </main>
     </div>
+
+    <script>
+      const signInForm = document.querySelector("#sign-in-form");
+      const signInMessage = document.querySelector("#sign-in-message");
+
+      signInForm.addEventListener("submit", (event) => {
+        const account = JSON.parse(localStorage.getItem("pawmatchAccount") || "null");
+        const email = document.querySelector("#sign-in-email").value.trim().toLowerCase();
+        const password = document.querySelector("#sign-in-password").value;
+
+        if (!account || account.email !== email || account.password !== password) {
+          event.preventDefault();
+          signInMessage.textContent = "The email or password does not match our records.";
+        }
+      });
+    </script>
   </body>
 </html>

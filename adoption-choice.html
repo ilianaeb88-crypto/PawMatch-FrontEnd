@@ -3,59 +3,162 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pawmatch - Choose Your Path</title>
+    <title>Pawmatch - Questionnaire</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page adoption-choice-page">
+  <body class="choice-page combined-questionnaire-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
-        <a href="index.html" class="brand">
+        <a href="home.html" class="brand">
           <span class="brand-icon" aria-hidden="true">🐾</span>
           <span class="brand-name">Pawmatch</span>
         </a>
 
         <nav class="nav-links" aria-label="Primary navigation">
-          <a href="#" class="nav-item">Profile</a>
+          <a href="profile.html" class="nav-item">Profile</a>
           <a href="#" class="nav-item">Questionnaire</a>
-          <a href="#" class="nav-item">Best Matches</a>
-          <a href="#" class="nav-item auth-link">Sign In</a>
-          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+          <a href="available-pets.html" class="nav-item">Available Pets</a>
         </nav>
       </header>
 
-      <main class="choice-bubble">
-        <h1>Are You Looking to Adopt or Foster?</h1>
+      <main class="combined-questionnaire">
+        <aside class="questionnaire-progress" aria-label="Questionnaire progress">
+          <h1>Your perfect match starts here.</h1>
+          <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="progress-fill"></span>
+          </div>
+          <p class="progress-count" id="progress-count">0% Complete</p>
+        </aside>
 
-        <div class="choice-options" role="list">
-          <button class="choice-option choice-option-primary" type="button" data-choice="foster">
-            <span class="choice-circle" aria-hidden="true"></span>
-            <span class="choice-label">Foster</span>
-          </button>
+        <section class="questionnaire-panel">
+          <h1>Tell Us About Your Ideal Companion</h1>
 
-          <button class="choice-option choice-option-secondary" type="button" data-choice="adopt">
-            <span class="choice-circle" aria-hidden="true"></span>
-            <span class="choice-label">Adopt</span>
-          </button>
-        </div>
+          <fieldset class="question-group">
+            <legend>Are you looking to adopt or foster?</legend>
+            <div class="question-options">
+              <button class="choice-option choice-option-primary" type="button" data-group="path" data-choice="foster">
+                <span class="choice-circle" aria-hidden="true"></span>
+                <span class="choice-label">Foster</span>
+              </button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="path" data-choice="adopt">
+                <span class="choice-circle" aria-hidden="true"></span>
+                <span class="choice-label">Adopt</span>
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="question-group">
+            <legend>Would you like a cat or dog?</legend>
+            <div class="question-options">
+              <button class="choice-option choice-option-primary" type="button" data-group="pet" data-choice="cat">
+                <span class="choice-circle" aria-hidden="true"></span>
+                <span class="choice-label">Cat</span>
+              </button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="pet" data-choice="dog">
+                <span class="choice-circle" aria-hidden="true"></span>
+                <span class="choice-label">Dog</span>
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="question-group">
+            <legend>What gender of pet are you looking for?</legend>
+            <div class="question-options question-options-three">
+              <button class="choice-option choice-option-primary" type="button" data-group="gender" data-choice="male">
+                <span class="choice-circle" aria-hidden="true"></span>
+                <span class="choice-label">Male</span>
+              </button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="gender" data-choice="female">
+                <span class="choice-circle" aria-hidden="true"></span>
+                <span class="choice-label">Female</span>
+              </button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="gender" data-choice="any">
+                <span class="choice-circle" aria-hidden="true"></span>
+                <span class="choice-label">No Preference</span>
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="question-group">
+            <legend>How old do you want your pet to be?</legend>
+            <div class="question-options question-options-four">
+              <button class="choice-option choice-option-primary" type="button" data-group="age" data-choice="less-than-6-months">0-1 (Baby)</button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="age" data-choice="1-3">1-3 (Young)</button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="age" data-choice="3-7">3-7 (Adult)</button>
+              <button class="choice-option choice-option-primary" type="button" data-group="age" data-choice="greater-than-7">Greater than 7 (Senior)</button>
+            </div>
+          </fieldset>
+
+          <button class="questionnaire-next" id="questionnaire-next" type="button" disabled>Next</button>
+        </section>
+
       </main>
     </div>
 
     <script>
-      const pathButtons = document.querySelectorAll(".choice-option");
+      const choiceButtons = document.querySelectorAll(".choice-option");
+      const nextButton = document.querySelector("#questionnaire-next");
+      const progressCount = document.querySelector("#progress-count");
+      const progressBar = document.querySelector(".progress-track");
+      const progressFill = document.querySelector(".progress-fill");
+      ["selectedPath", "selectedPet", "selectedGender", "selectedAge"].forEach((key) => localStorage.removeItem(key));
       const savedPath = localStorage.getItem("selectedPath");
+      const savedPet = localStorage.getItem("selectedPet");
+      const savedGender = localStorage.getItem("selectedGender");
+      const savedAge = localStorage.getItem("selectedAge");
 
-      pathButtons.forEach((button) => {
-        if (button.dataset.choice === savedPath) {
+      function refreshNextButton() {
+        nextButton.disabled = !localStorage.getItem("selectedPath")
+          || !localStorage.getItem("selectedPet")
+          || !localStorage.getItem("selectedGender")
+          || !localStorage.getItem("selectedAge");
+      }
+
+      function refreshProgress() {
+        const answeredCount = ["selectedPath", "selectedPet", "selectedGender", "selectedAge"]
+          .filter((key) => localStorage.getItem(key)).length;
+        const percentage = answeredCount * 25;
+        progressCount.textContent = `${percentage}% Complete`;
+        progressBar.setAttribute("aria-valuemax", "100");
+        progressBar.setAttribute("aria-valuenow", percentage);
+        progressFill.style.height = `${percentage}%`;
+      }
+
+      choiceButtons.forEach((button) => {
+        const savedChoices = {
+          path: savedPath,
+          pet: savedPet,
+          gender: savedGender,
+          age: savedAge,
+        };
+        const savedChoice = savedChoices[button.dataset.group];
+
+        if (button.dataset.choice === savedChoice) {
           button.classList.add("is-selected");
         }
 
         button.addEventListener("click", () => {
-          pathButtons.forEach((btn) => btn.classList.remove("is-selected"));
+          document.querySelectorAll(`[data-group="${button.dataset.group}"]`).forEach((btn) => btn.classList.remove("is-selected"));
           button.classList.add("is-selected");
-          localStorage.setItem("selectedPath", button.dataset.choice);
-          window.location.href = "pet-choice.html";
+          const storageKeys = {
+            path: "selectedPath",
+            pet: "selectedPet",
+            gender: "selectedGender",
+            age: "selectedAge",
+          };
+          localStorage.setItem(storageKeys[button.dataset.group], button.dataset.choice);
+          refreshNextButton();
+          refreshProgress();
         });
       });
+
+      nextButton.addEventListener("click", () => {
+        if (nextButton.disabled) return;
+        window.location.href = localStorage.getItem("selectedPet") === "cat" ? "cat-breed.html" : "dog-breed.html";
+      });
+
+      refreshNextButton();
+      refreshProgress();
     </script>
   </body>
 </html>

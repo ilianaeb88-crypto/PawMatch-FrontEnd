@@ -6,7 +6,7 @@
     <title>Pawmatch - Choose Dog Breed</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page breed-choice-page">
+  <body class="choice-page breed-choice-page combined-questionnaire-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="index.html" class="brand">
@@ -17,14 +17,21 @@
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="#" class="nav-item">Profile</a>
           <a href="#" class="nav-item">Questionnaire</a>
-          <a href="#" class="nav-item">Best Matches</a>
-          <a href="#" class="nav-item auth-link">Sign In</a>
-          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+          <a href="available-pets.html" class="nav-item">Available Pets</a>
         </nav>
       </header>
 
-      <main class="choice-bubble">
-        <h1>What Breed of Dog are You Looking For?</h1>
+      <main class="combined-questionnaire">
+        <aside class="questionnaire-progress" aria-label="Questionnaire progress">
+          <h1>Your perfect match starts here.</h1>
+          <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="progress-fill"></span>
+          </div>
+          <p class="progress-count" id="progress-count">0% Complete</p>
+        </aside>
+
+        <section class="questionnaire-panel">
+          <h1>What Breed of Dog are You Looking For?</h1>
 
         <label class="breed-label" for="dog-breed">Select a breed</label>
         <div class="breed-dropdown">
@@ -149,12 +156,29 @@
           <option>Wire Fox Terrier</option>
           <option>Wirehaired Pointing Griffon</option>
           <option>Yorkshire Terrier</option>
-          <option>Mixed Breed</option>
           <option>No Preference</option>
         </select>
         </div>
 
-        <a class="back-button" href="pet-weight.html">Back</a>
+          <fieldset class="question-group breed-weight-group">
+            <legend>What weight of dog would you prefer?</legend>
+            <div class="question-options question-options-four">
+              <button class="choice-option choice-option-primary" type="button" data-weight="0-10">0-10 Pounds</button>
+              <button class="choice-option choice-option-secondary" type="button" data-weight="10-30">10-30 Pounds</button>
+              <button class="choice-option choice-option-primary" type="button" data-weight="30-50">30-50 Pounds</button>
+              <button class="choice-option choice-option-secondary" type="button" data-weight="50-70">50-70 Pounds</button>
+              <button class="choice-option choice-option-primary" type="button" data-weight="70-90">70-90 Pounds</button>
+              <button class="choice-option choice-option-secondary" type="button" data-weight="90-110">90-110 Pounds</button>
+              <button class="choice-option choice-option-primary" type="button" data-weight="greater-than-110">Greater than 110 Pounds</button>
+              <button class="choice-option choice-option-secondary" type="button" data-weight="no-preference">No Preference</button>
+            </div>
+          </fieldset>
+
+          <div class="dog-breed-actions">
+            <a class="back-button" href="adoption-choice.html">Back</a>
+            <button class="questionnaire-next" id="dog-breed-next" type="button" disabled>Next</button>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -163,7 +187,48 @@
       const breedDropdown = breedSelect.closest(".breed-dropdown");
       const breedTrigger = document.createElement("button");
       const breedMenu = document.createElement("div");
+      localStorage.removeItem("selectedWeight");
+      localStorage.removeItem("selectedDogBreed");
       const savedBreed = localStorage.getItem("selectedDogBreed");
+      const weightButtons = document.querySelectorAll("[data-weight]");
+      const nextButton = document.querySelector("#dog-breed-next");
+      const progressCount = document.querySelector("#progress-count");
+      const progressBar = document.querySelector(".progress-track");
+      const progressFill = document.querySelector(".progress-fill");
+
+      const questionKeys = [
+        "selectedPath", "selectedPet", "selectedGender", "selectedAge", "selectedWeight",
+        "selectedDogBreed", "selectedDogHairLength", "selectedDogActivity", "selectedDogHouseTraining",
+        "selectedDogDisability", "selectedDogPersonality", "selectedDogType", "selectedDogProtective",
+        "selectedDogBarking", "selectedDogShedding", "selectedChildrenUnderTwelve", "selectedOtherPets",
+      ];
+
+      function refreshDogBreedProgress() {
+        const answeredCount = ["selectedWeight", "selectedDogBreed"]
+          .filter((key) => localStorage.getItem(key)).length;
+        const percentage = answeredCount * 50;
+        progressCount.textContent = `${percentage}% Complete`;
+        progressBar.setAttribute("aria-valuenow", percentage);
+        progressFill.style.height = `${percentage}%`;
+      }
+
+      progressCount.textContent = "0% Complete";
+      progressBar.setAttribute("aria-valuenow", "0");
+      progressFill.style.height = "0%";
+
+      weightButtons.forEach((button) => {
+        if (button.dataset.weight === localStorage.getItem("selectedWeight")) {
+          button.classList.add("is-selected");
+        }
+
+        button.addEventListener("click", () => {
+          weightButtons.forEach((weightButton) => weightButton.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedWeight", button.dataset.weight);
+          nextButton.disabled = !localStorage.getItem("selectedDogBreed");
+          refreshDogBreedProgress();
+        });
+      });
 
       if (savedBreed) {
         breedSelect.value = savedBreed;
@@ -186,9 +251,8 @@
           breedTrigger.textContent = option.textContent;
           breedMenu.hidden = true;
           localStorage.setItem("selectedDogBreed", breedSelect.value);
-          window.location.href = breedSelect.value === "No Preference"
-            ? "dog-hair-length.html"
-            : "dog-activity-level.html";
+          nextButton.disabled = !localStorage.getItem("selectedWeight");
+          refreshDogBreedProgress();
         });
         breedMenu.append(optionButton);
       });
@@ -200,6 +264,14 @@
       });
       document.addEventListener("click", (event) => {
         if (!breedDropdown.contains(event.target)) breedMenu.hidden = true;
+      });
+
+      nextButton.disabled = !localStorage.getItem("selectedWeight") || !localStorage.getItem("selectedDogBreed");
+      nextButton.addEventListener("click", () => {
+        if (nextButton.disabled) return;
+        window.location.href = breedSelect.value === "No Preference"
+          ? "dog-hair-length.html"
+          : "dog-activity-level.html";
       });
     </script>
   </body>

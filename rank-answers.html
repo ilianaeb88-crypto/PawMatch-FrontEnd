@@ -17,16 +17,15 @@
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="#" class="nav-item">Profile</a>
           <a href="#" class="nav-item">Questionnaire</a>
-          <a href="#" class="nav-item">Best Matches</a>
-          <a href="#" class="nav-item auth-link">Sign In</a>
-          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+          <a href="available-pets.html" class="nav-item">Available Pets</a>
         </nav>
       </header>
 
       <main class="choice-bubble ranking-bubble">
         <h1>Rank Your Answers Based On Their Importance 1-15</h1>
+        <div class="rank-number-strip" id="rank-number-strip" aria-label="Choose an importance rank"></div>
         <div class="ranking-list" id="ranking-list"></div>
-        <a class="back-button" href="other-pets.html">Back</a>
+        <a class="back-button" href="children-other-pets.html">Back</a>
         <a class="back-button done-button" href="questionnaire-complete.html">Done</a>
       </main>
     </div>
@@ -62,6 +61,26 @@
       const noPreferenceValues = new Set(["any", "no-preference", "No Preference", "no preference"]);
       const rankingList = document.querySelector("#ranking-list");
       const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
+      let activeAnswerKey = null;
+      const rankNumberStrip = document.querySelector("#rank-number-strip");
+
+      Array.from({ length: 15 }, (_, index) => index + 1).forEach((rank) => {
+        const rankButton = document.createElement("button");
+        rankButton.className = "rank-number";
+        rankButton.type = "button";
+        rankButton.textContent = rank;
+        rankButton.addEventListener("click", () => {
+          if (!activeAnswerKey) return;
+          savedRanks[activeAnswerKey] = rank;
+          localStorage.setItem("answerRanks", JSON.stringify(savedRanks));
+          const activeItem = document.querySelector(`[data-answer-key="${activeAnswerKey}"]`);
+          activeItem.querySelector(".rank-value").textContent = rank;
+          activeItem.classList.remove("is-active");
+          rankNumberStrip.querySelectorAll(".rank-number").forEach((button) => button.classList.remove("is-active"));
+          activeAnswerKey = null;
+        });
+        rankNumberStrip.append(rankButton);
+      });
 
       function getAnswerLabel(definition, value) {
         if (definition.values && definition.values[value]) return definition.values[value];
@@ -83,20 +102,17 @@
       answers.forEach((answer) => {
         const item = document.createElement("div");
         item.className = "rank-item";
+        item.dataset.answerKey = answer.key;
         item.innerHTML = `<div class="rank-answer">
-            <span>${answer.answerLabel}</span>
-            <select class="rank-select" aria-label="Rank ${answer.answerLabel}">
-              <option value="">Choose rank</option>
-              ${Array.from({ length: 15 }, (_, index) => {
-                const rank = index + 1;
-                return `<option value="${rank}"${savedRanks[answer.key] === rank ? " selected" : ""}>${rank}</option>`;
-              }).join("")}
-            </select>
+            <button class="rank-answer-button" type="button">${answer.answerLabel}</button>
+            <span class="rank-value" aria-label="Assigned rank">${savedRanks[answer.key] || ""}</span>
           </div>`;
 
-        item.querySelector(".rank-select").addEventListener("change", (event) => {
-          savedRanks[answer.key] = Number(event.target.value);
-          localStorage.setItem("answerRanks", JSON.stringify(savedRanks));
+        item.querySelector(".rank-answer-button").addEventListener("click", () => {
+          document.querySelectorAll(".rank-item").forEach((answerItem) => answerItem.classList.remove("is-active"));
+          rankNumberStrip.querySelectorAll(".rank-number").forEach((button) => button.classList.remove("is-active"));
+          item.classList.add("is-active");
+          activeAnswerKey = answer.key;
         });
 
         rankingList.append(item);

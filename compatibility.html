@@ -5,25 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pawmatch - Compatibility</title>
     <link rel="stylesheet" href="styles.css" />
+    <script>
+      const requiredQuestionnaireKeys = ["selectedPath", "selectedPet", "selectedGender", "selectedAge"];
+      const savedQuestionnaireRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
+      if (requiredQuestionnaireKeys.some((key) => !localStorage.getItem(key)) || !Object.keys(savedQuestionnaireRanks).length) {
+        window.location.replace("adoption-choice.html");
+      }
+    </script>
   </head>
   <body class="choice-page compatibility-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
-        <a href="index.html" class="brand">
+        <a href="home.html" class="brand">
           <span class="brand-icon" aria-hidden="true">🐾</span>
           <span class="brand-name">Pawmatch</span>
         </a>
         <nav class="nav-links" aria-label="Primary navigation">
+          <a href="profile.html" class="nav-item">Profile</a>
           <a href="match-results.html" class="nav-item">Best Matches</a>
-          <a href="#" class="nav-item auth-link">Sign In</a>
-          <a href="#" class="nav-item auth-link auth-link-strong">Create an Account</a>
+          <a href="available-pets.html" class="nav-item">Available Pets</a>
         </nav>
       </header>
 
       <main class="compatibility-layout" id="compatibility-profile">
         <section class="compatibility-facts">
           <h2 id="compatibility-name"></h2>
-          <div class="comparison-header"><span>Your Answer</span><span>Pet Characteristic</span></div>
+          <div class="comparison-header"><span>Your Answer</span><span>Rating</span><span>Pet Characteristic</span></div>
           <div class="comparison-list" id="comparison-list"></div>
         </section>
       </main>
@@ -31,42 +38,44 @@
 
     <script>
       const compatibilityProfiles = {
-        milo: { name: "Milo", image: "src/assets/image copy 4.png", score: "98% Match", traits: { Breed: "Border Collie Mix", Age: "3 Years Old", Gender: "Male", Size: "Medium", Activity: "Very Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Social" } },
-        luna: { name: "Luna", image: "src/assets/image copy 3.png", score: "95% Match", traits: { Breed: "Domestic Shorthair", Age: "2 Years Old", Gender: "Female", Size: "Small - 8lb", Activity: "Moderately Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Reserved" } },
-        bear: { name: "Bear", image: "src/assets/image copy 5.png", score: "91% Match", traits: { Breed: "Corgi Mix", Age: "5 Years Old", Gender: "Male", Size: "Medium", Activity: "Moderately Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Social" } },
-        cleo: { name: "Cleo", image: "src/assets/image copy 2.png", score: "88% Match", traits: { Breed: "Calico", Age: "4 Years Old", Gender: "Female", Size: "Small - 9lb", Activity: "Non-Active", "House Trained": "Yes", Disability: "Not Disabled", Personality: "Reserved" } }
-      };
-
-      const answerLabels = {
-        selectedGender: { label: "Gender", values: { male: "Male", female: "Female", any: "No Preference" } },
-        selectedAge: { label: "Age", values: { "less-than-6-months": "0-1 (Baby)", "1-3": "1-3 (Young)", "3-7": "3-7 (Adult)", "greater-than-7": "Greater than 7 (Senior)" } },
-        selectedDogBreed: { label: "Breed" }, selectedCatBreed: { label: "Breed" },
-        selectedDogActivity: { label: "Activity", values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active" } },
-        selectedCatActivity: { label: "Activity", values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active" } },
-        selectedDogHouseTraining: { label: "House Trained", values: { yes: "Yes", no: "No Preference" } },
-        selectedCatHouseTraining: { label: "House Trained", values: { yes: "Yes", no: "No Preference" } },
-        selectedDogDisability: { label: "Disability", values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" } },
-        selectedCatDisability: { label: "Disability", values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" } },
-        selectedDogPersonality: { label: "Personality", values: { social: "Social", reserved: "Reserved" } },
-        selectedCatPersonality: { label: "Personality", values: { social: "Social", reserved: "Reserved" } }
+        milo: { name: "Milo", score: "98% Match", traits: { Breed: "Border Collie Mix", Age: "3 Years Old", Gender: "Male", Weight: "Medium", Activity: "Very Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Social" } },
+        luna: { name: "Luna", score: "95% Match", traits: { Breed: "Domestic Shorthair", Age: "2 Years Old", Gender: "Female", Weight: "Small - 8lb", Activity: "Moderately Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Reserved" } },
+        bear: { name: "Bear", score: "91% Match", traits: { Breed: "Corgi Mix", Age: "5 Years Old", Gender: "Male", Weight: "Medium", Activity: "Moderately Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Social" } },
+        cleo: { name: "Cleo", score: "88% Match", traits: { Breed: "Calico", Age: "4 Years Old", Gender: "Female", Weight: "Small - 9lb", Activity: "Non-Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Reserved" } }
       };
 
       const petId = new URLSearchParams(window.location.search).get("pet") || "milo";
+      const petPrefix = petId === "luna" || petId === "cleo" ? "Cat" : "Dog";
+      const answerDefinitions = [
+          { label: "Trained", key: `selected${petPrefix}HouseTraining`, values: { yes: "Yes", no: "No" }, trait: "Trained" },
+          { label: "Disability", key: `selected${petPrefix}Disability`, values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" }, trait: "Disability" },
+          { label: "Activity Level", key: `selected${petPrefix}Activity`, values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active", "no-preference": "No Preference" }, trait: "Activity" },
+          { label: "Sociability", key: `selected${petPrefix}Personality`, values: { social: "Social", reserved: "Reserved", "no-preference": "No Preference" }, trait: "Sociability" },
+          { label: "Gender", key: "selectedGender", values: { male: "Male", female: "Female", any: "No Preference" }, trait: "Gender" },
+          { label: "Weight", key: petPrefix === "Cat" ? "selectedCatWeight" : "selectedWeight", format: (value) => `${value.replaceAll("greater-than-", "Greater than ")} Pounds`, trait: "Weight" },
+          { label: "Breed", key: `selected${petPrefix}Breed`, trait: "Breed" },
+          { label: "Age", key: "selectedAge", values: { "less-than-6-months": "0-1 (Baby)", "1-3": "1-3 (Young)", "3-7": "3-7 (Adult)", "greater-than-7": "Greater than 7 (Senior)" }, trait: "Age" },
+      ];
+
       const profile = compatibilityProfiles[petId] || compatibilityProfiles.milo;
+      const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
       document.title = `Pawmatch - ${profile.name} Compatibility`;
       document.querySelector("#compatibility-name").textContent = profile.name;
 
-      const comparisons = [
-        ...Object.entries(answerLabels).map(([key, definition]) => ({ key, label: definition.label, value: localStorage.getItem(key), values: definition.values }))
-      ].filter((comparison) => comparison.value && comparison.value !== "No Preference" && comparison.value !== "any" && comparison.value !== "no-preference");
+      const comparisons = answerDefinitions.map((definition) => ({
+          ...definition,
+          value: localStorage.getItem(definition.key),
+        }));
 
       const comparisonList = document.querySelector("#comparison-list");
       comparisons.forEach((comparison) => {
         const row = document.createElement("div");
-        const answer = comparison.values?.[comparison.value] || comparison.value.replaceAll("-", " ");
-        const characteristic = profile.traits[comparison.label] || "See profile";
+        const answer = comparison.value
+          ? comparison.values?.[comparison.value] || comparison.format?.(comparison.value) || comparison.value.replaceAll("-", " ")
+          : "No answer yet";
+        const characteristic = profile.traits[comparison.trait];
         row.className = "comparison-row";
-        row.innerHTML = `<strong>${comparison.label}</strong><span>${answer}</span><span>${characteristic}</span>`;
+        row.innerHTML = `<span>${answer}</span><span>${savedRanks[comparison.key] || "-"}</span><span>${characteristic}</span>`;
         comparisonList.append(row);
       });
     </script>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawmatch - Profile</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="choice-page profile-settings-page">
+    <div class="choice-shell">
+      <header class="topbar choice-topbar">
+        <a href="home.html" class="brand">
+          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <span class="brand-name">Pawmatch</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="home.html" class="nav-item">Home</a>
+          <a href="available-pets.html" class="nav-item">Available Pets</a>
+        </nav>
+      </header>
+
+      <main class="profile-settings-layout">
+        <aside class="profile-settings-sidebar" aria-label="Profile settings navigation">
+          <a class="profile-settings-nav is-active" href="profile.html">Profile</a>
+          <a class="profile-settings-nav" href="notifications.html">Notifications</a>
+          <a class="profile-settings-nav" href="password.html">Password</a>
+          <a class="profile-settings-nav" id="liked-pets-tab" href="liked-pets.html">Saved Pets</a>
+        </aside>
+
+        <section class="profile-settings-content">
+          <form class="profile-settings-card" id="profile-form">
+            <div class="profile-settings-card-heading">
+              <div>
+                <h1>Profile Information</h1>
+                <p>Update your personal details and photo</p>
+              </div>
+              <button class="profile-save-button" type="submit">Save changes</button>
+            </div>
+
+            <div class="profile-identity">
+              <div class="profile-avatar" aria-hidden="true">A</div>
+              <div>
+                <strong id="profile-display-name">Your Profile</strong>
+                <span>Pawmatch member</span>
+                <button class="profile-photo-button" type="button">Change photo</button>
+              </div>
+            </div>
+
+            <div class="profile-form-grid">
+              <label>First name<input id="profile-name" name="name" type="text" value="" required /></label>
+              <label>Last name<input id="profile-last-name" name="last-name" type="text" value="" /></label>
+              <label class="profile-form-wide">Email address<input id="profile-email" name="email" type="email" value="" required /></label>
+              <label>Phone number<input id="profile-phone" name="phone" type="tel" placeholder="+1 (555) 000-0000" /></label>
+            </div>
+            <p class="profile-form-message" id="profile-message" role="status" aria-live="polite"></p>
+          </form>
+
+          <section class="profile-settings-card" id="security">
+            <h2>Change Password</h2>
+            <p>Set a new password for your account</p>
+            <form class="profile-password-form" id="profile-password-form">
+              <label>Current password<input type="password" name="current-password" autocomplete="current-password" placeholder="Enter current password" required /></label>
+              <label>New password<input type="password" name="new-password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required /></label>
+              <button class="profile-save-button" type="submit">Update password</button>
+            </form>
+            <p class="profile-form-message" id="password-message" role="status" aria-live="polite"></p>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const account = JSON.parse(localStorage.getItem("pawmatchAccount") || "null");
+      const profileName = document.querySelector("#profile-name");
+      const profileEmail = document.querySelector("#profile-email");
+      const profileDisplayName = document.querySelector("#profile-display-name");
+      const profileForm = document.querySelector("#profile-form");
+      const profileMessage = document.querySelector("#profile-message");
+      const passwordForm = document.querySelector("#profile-password-form");
+      const passwordMessage = document.querySelector("#password-message");
+      const likedPetsTab = document.querySelector("#liked-pets-tab");
+
+      if (account) {
+        profileName.value = account.name || "";
+        profileEmail.value = account.email || "";
+        profileDisplayName.textContent = account.name || "Your Profile";
+      }
+
+      likedPetsTab.addEventListener("click", (event) => {
+        const likedPets = JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
+        if (likedPets.length) return;
+        event.preventDefault();
+        document.querySelector(".no-saved-pets-bubble")?.remove();
+        const bubble = document.createElement("div");
+        bubble.className = "no-saved-pets-bubble";
+        bubble.textContent = "You Have No Saved Pets";
+        document.body.append(bubble);
+      });
+
+      profileForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const nextAccount = {
+          ...(account || {}),
+          name: profileName.value.trim(),
+          email: profileEmail.value.trim().toLowerCase(),
+        };
+        localStorage.setItem("pawmatchAccount", JSON.stringify(nextAccount));
+        profileDisplayName.textContent = nextAccount.name || "Your Profile";
+        profileMessage.textContent = "Profile saved.";
+      });
+
+      passwordForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const currentPassword = passwordForm.elements["current-password"].value;
+        const newPassword = passwordForm.elements["new-password"].value;
+        const savedAccount = JSON.parse(localStorage.getItem("pawmatchAccount") || "null");
+
+        if (!savedAccount || savedAccount.password !== currentPassword) {
+          passwordMessage.textContent = "The current password does not match our records.";
+          return;
+        }
+
+        savedAccount.password = newPassword;
+        localStorage.setItem("pawmatchAccount", JSON.stringify(savedAccount));
+        passwordMessage.textContent = "Password updated.";
+        passwordForm.reset();
+      });
+    </script>
+  </body>
+</html>
