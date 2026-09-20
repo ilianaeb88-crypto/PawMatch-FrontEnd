@@ -18,8 +18,9 @@
             <input id="welcome-email" name="email" type="email" placeholder="Email address" autocomplete="email" required />
             <button class="welcome-signup-button" type="submit">Sign Up</button>
             <span class="welcome-form-divider">OR</span>
-            <button class="welcome-google-button" type="button"><span class="google-icon" aria-hidden="true">G</span>Continue with Google</button>
+            <button class="welcome-google-button" id="google-sign-in-button" type="button"><span class="google-icon" aria-hidden="true">G</span>Continue with Google</button>
           </form>
+          <p class="welcome-form-message" id="welcome-google-message" role="alert" aria-live="polite"></p>
         </div>
       </div>
       <aside class="account-choice-visual" aria-label="Pawmatch pet adoption">
@@ -29,7 +30,56 @@
       </aside>
     </section>
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
+      const googleButton = document.querySelector("#google-sign-in-button");
+      const googleMessage = document.querySelector("#welcome-google-message");
+      const googleClientId = "%VITE_GOOGLE_CLIENT_ID%";
+      const configuredApiBaseUrl = "%VITE_API_BASE_URL%";
+      const apiBaseUrl = configuredApiBaseUrl.startsWith("%VITE_") ? "http://localhost:4000/api" : configuredApiBaseUrl;
+
+      function showGoogleMessage(message) {
+        googleMessage.textContent = message;
+      }
+
+      async function finishGoogleSignIn(response) {
+        try {
+          const apiResponse = await fetch(`${apiBaseUrl}/auth/google`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ credential: response.credential }),
+          });
+          const result = await apiResponse.json();
+          if (!apiResponse.ok) throw new Error(result.error || "Google sign-in failed.");
+          localStorage.setItem("pawmatchToken", result.token);
+          localStorage.setItem("pawmatchAccount", JSON.stringify(result.user));
+          window.location.href = "home.html";
+        } catch (error) {
+          showGoogleMessage(error.message);
+          googleButton.disabled = false;
+        }
+      }
+
+      function initializeGoogleSignIn() {
+        if (googleClientId.startsWith("%VITE_")) {
+          showGoogleMessage("Google sign-in is not configured for this deployment.");
+          googleButton.disabled = false;
+          return;
+        }
+        if (!window.google?.accounts?.id) {
+          showGoogleMessage("Google sign-in is still loading. Please try again.");
+          googleButton.disabled = false;
+          return;
+        }
+        window.google.accounts.id.initialize({ client_id: googleClientId, callback: finishGoogleSignIn });
+        window.google.accounts.id.prompt();
+      }
+
+      googleButton.addEventListener("click", () => {
+        googleButton.disabled = true;
+        initializeGoogleSignIn();
+      });
+
       localStorage.removeItem("selectedPath");
       localStorage.removeItem("selectedPet");
       localStorage.removeItem("selectedGender");
