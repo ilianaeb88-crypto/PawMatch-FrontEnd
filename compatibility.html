@@ -6,9 +6,7 @@
     <title>Pawmatch - Compatibility</title>
     <link rel="stylesheet" href="styles.css" />
     <script>
-      const requiredQuestionnaireKeys = ["selectedPath", "selectedPet", "selectedGender", "selectedAge"];
-      const savedQuestionnaireRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
-      if (requiredQuestionnaireKeys.some((key) => !localStorage.getItem(key)) || !Object.keys(savedQuestionnaireRanks).length) {
+      if (localStorage.getItem("questionnaireCompleted") !== "true") {
         window.location.replace("adoption-choice.html");
       }
     </script>
@@ -17,7 +15,7 @@
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
-          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" />
           <span class="brand-name">Pawmatch</span>
         </a>
         <nav class="nav-links" aria-label="Primary navigation">
@@ -33,6 +31,7 @@
           <div class="comparison-header"><span>Your Answer</span><span>Rating</span><span>Pet Characteristic</span></div>
           <div class="comparison-list" id="comparison-list"></div>
         </section>
+        <a class="profile-return compatibility-return" id="compatibility-return" href="pet-profile.html">Back</a>
       </main>
     </div>
 
@@ -47,14 +46,21 @@
       const petId = new URLSearchParams(window.location.search).get("pet") || "milo";
       const petPrefix = petId === "luna" || petId === "cleo" ? "Cat" : "Dog";
       const answerDefinitions = [
-          { label: "Trained", key: `selected${petPrefix}HouseTraining`, values: { yes: "Yes", no: "No" }, trait: "Trained" },
-          { label: "Disability", key: `selected${petPrefix}Disability`, values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" }, trait: "Disability" },
-          { label: "Activity Level", key: `selected${petPrefix}Activity`, values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active", "no-preference": "No Preference" }, trait: "Activity" },
-          { label: "Sociability", key: `selected${petPrefix}Personality`, values: { social: "Social", reserved: "Reserved", "no-preference": "No Preference" }, trait: "Sociability" },
-          { label: "Gender", key: "selectedGender", values: { male: "Male", female: "Female", any: "No Preference" }, trait: "Gender" },
-          { label: "Weight", key: petPrefix === "Cat" ? "selectedCatWeight" : "selectedWeight", format: (value) => `${value.replaceAll("greater-than-", "Greater than ")} Pounds`, trait: "Weight" },
-          { label: "Breed", key: `selected${petPrefix}Breed`, trait: "Breed" },
-          { label: "Age", key: "selectedAge", values: { "less-than-6-months": "0-1 (Baby)", "1-3": "1-3 (Young)", "3-7": "3-7 (Adult)", "greater-than-7": "Greater than 7 (Senior)" }, trait: "Age" },
+        { label: "Gender", key: "selectedGender", values: { male: "Male", female: "Female", any: "No Preference" }, trait: "Gender" },
+        { label: "Age", key: "selectedAge", values: { "less-than-6-months": "0-1 (Baby)", "1-3": "1-3 (Young)", "3-7": "3-7 (Adult)", "greater-than-7": "Greater than 7 (Senior)" }, trait: "Age" },
+        { label: "Weight", key: petPrefix === "Cat" ? "selectedCatWeight" : "selectedWeight", format: (value) => `${value.replaceAll("greater-than-", "Greater than ")} Pounds`, trait: "Weight" },
+        { label: "Breed", key: `selected${petPrefix}Breed`, trait: "Breed" },
+        { label: "Hair Length", key: `selected${petPrefix}HairLength`, values: { "long-hair": "Long-Hair", "short-hair": "Short-Hair" }, trait: "Hair Length" },
+        { label: "Activity Level", key: `selected${petPrefix}Activity`, values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active", "no-preference": "No Preference" }, trait: "Activity" },
+        { label: "House Training", key: `selected${petPrefix}HouseTraining`, values: { yes: "Yes, House Trained", no: "No Preference" }, trait: "Trained" },
+        { label: "Disability", key: `selected${petPrefix}Disability`, values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" }, trait: "Disability" },
+        ...(petPrefix === "Dog" ? [
+          { label: "Dog Group", key: "selectedDogType", trait: "Dog Group" },
+          { label: "Protectivity", key: "selectedDogProtective", values: { protective: "Protective", "not-protective": "Not Protective" }, trait: "Protectivity" },
+          { label: "Barking", key: "selectedDogBarking", values: { "does-not-matter": "Barking Does Not Matter", "does-not-bark": "Does Not Bark a Lot" }, trait: "Barking" },
+          { label: "Shedding", key: "selectedDogShedding", values: { "does-not-shed": "Does Not Shed", "shedding-does-not-matter": "Shedding Does Not Matter" }, trait: "Shedding" },
+        ] : []),
+        { label: "Personality", key: `selected${petPrefix}Personality`, values: { social: "Social", reserved: "Reserved", "no-preference": "No Preference" }, trait: "Sociability" },
       ];
 
       const profile = compatibilityProfiles[petId] || compatibilityProfiles.milo;
@@ -62,22 +68,39 @@
       document.title = `Pawmatch - ${profile.name} Compatibility`;
       document.querySelector("#compatibility-name").textContent = profile.name;
 
+      function getAnswerLabel(definition, value) {
+        if (definition.values && definition.values[value]) return definition.values[value];
+        if (definition.format) return definition.format(value);
+        return value.replaceAll("-", " ");
+      }
+
+      function isNoPreferenceAnswer(definition, value) {
+        const normalizedValue = value.trim().toLowerCase();
+        return normalizedValue === "any"
+          || normalizedValue === "no-preference"
+          || getAnswerLabel(definition, value).trim().toLowerCase() === "no preference";
+      }
+
+      document.querySelector("#compatibility-return").href = `pet-profile.html?pet=${petId}`;
+
       const comparisons = answerDefinitions.map((definition) => ({
           ...definition,
           value: localStorage.getItem(definition.key),
-        }));
+        })).filter((comparison) => comparison.value
+          && Object.prototype.hasOwnProperty.call(savedRanks, comparison.key)
+          && !isNoPreferenceAnswer(comparison, comparison.value));
+      comparisons.sort((first, second) => savedRanks[first.key] - savedRanks[second.key]);
 
       const comparisonList = document.querySelector("#comparison-list");
       comparisons.forEach((comparison) => {
         const row = document.createElement("div");
-        const answer = comparison.value
-          ? comparison.values?.[comparison.value] || comparison.format?.(comparison.value) || comparison.value.replaceAll("-", " ")
-          : "No answer yet";
+        const answer = getAnswerLabel(comparison, comparison.value);
         const characteristic = profile.traits[comparison.trait];
         row.className = "comparison-row";
-        row.innerHTML = `<span>${answer}</span><span>${savedRanks[comparison.key] || "-"}</span><span>${characteristic}</span>`;
+        row.innerHTML = `<span>${answer}</span><span>${savedRanks[comparison.key]}</span><span>${characteristic || "Not provided"}</span>`;
         comparisonList.append(row);
       });
     </script>
+    <script type="module" src="./src/nav-feedback.js"></script>
   </body>
 </html>

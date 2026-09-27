@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pawmatch - Your Matches</title>
     <link rel="stylesheet" href="styles.css" />
+    <script>
+      if (localStorage.getItem("questionnaireCompleted") !== "true") {
+        window.location.replace("home.html");
+      }
+    </script>
   </head>
   <body class="choice-page match-results-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
-          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" />
           <span class="brand-name">Pawmatch</span>
         </a>
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="profile.html" class="nav-item">Profile</a>
           <a href="#" class="nav-item">Questionnaire</a>
-          <a href="#" class="nav-item">Best Matches</a>
           <a href="available-pets.html" class="nav-item available-pets-top-button">Available Pets</a>
         </nav>
       </header>
@@ -89,10 +93,81 @@
             </div>
           </article>
         </section>
+        <p class="matches-empty" id="matches-empty" role="status" hidden>No pets match your selected species and top-ranked preferences.</p>
       </main>
     </div>
     <script>
-      document.querySelectorAll(".profile-card").forEach((card) => {
+      const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
+      const selectedPet = localStorage.getItem("selectedPet");
+      const topRankedAnswers = Object.entries(savedRanks)
+        .map(([key, rank]) => ({ key, rank: Number(rank), value: localStorage.getItem(key) }))
+        .filter((answer) => {
+          if (!answer.value || !Number.isFinite(answer.rank)) return false;
+          const normalizedValue = answer.value.trim().toLowerCase();
+          if (["any", "no-preference", "no", "no preference"].includes(normalizedValue)) return false;
+          if (answer.key === "selectedWeight" || answer.key.startsWith("selectedDog")) return selectedPet === "dog";
+          if (answer.key.startsWith("selectedCat")) return selectedPet === "cat";
+          return true;
+        })
+        .sort((first, second) => first.rank - second.rank)
+        .slice(0, 3);
+
+      const pets = {
+        milo: { species: "dog", breed: "German Shepherd", group: "herding", age: 3, gender: "male", size: "medium", activity: "very-active", trained: "yes", disability: "not-disabled", personality: "social" },
+        luna: { species: "cat", breed: "Domestic Shorthair", age: 2, gender: "female", weight: 8, activity: "moderately-active", trained: "yes", disability: "not-disabled", personality: "reserved" },
+        bear: { species: "dog", breed: "Shepherd Mix", group: "herding", age: 5, gender: "male", size: "medium", activity: "moderately-active", trained: "yes", disability: "not-disabled", personality: "social" },
+        cleo: { species: "cat", breed: "Calico", age: 4, gender: "female", weight: 9, activity: "non-active", trained: "yes", disability: "not-disabled", personality: "reserved" },
+      };
+
+      function matchesAge(age, preference) {
+        if (preference === "less-than-6-months") return age < 0.5;
+        if (preference === "1-3") return age >= 1 && age < 3;
+        if (preference === "3-7") return age >= 3 && age <= 7;
+        if (preference === "greater-than-7") return age > 7;
+        return true;
+      }
+
+      function matchesWeight(pet, answerKey, preference) {
+        if (answerKey === "selectedCatWeight") {
+          if (typeof pet.weight !== "number") return true;
+          const [minimum, maximum] = preference.split("-").map(Number);
+          if (preference === "greater-than-25") return pet.weight > 25;
+          return pet.weight >= minimum && pet.weight <= maximum;
+        }
+
+        if (answerKey === "selectedWeight") {
+          if (!pet.size) return true;
+          const sizeByRange = {
+            "0-10": "small", "10-30": "small", "30-50": "medium", "50-70": "medium",
+            "70-90": "large", "90-110": "large", "greater-than-110": "large",
+          };
+          return sizeByRange[preference] === pet.size;
+        }
+
+        return true;
+      }
+
+      function matchesRankedAnswer(pet, answer) {
+        const { key, value } = answer;
+        if (key === "selectedGender") return value === "any" || pet.gender === value;
+        if (key === "selectedAge") return matchesAge(pet.age, value);
+        if (key === "selectedWeight" || key === "selectedCatWeight") return matchesWeight(pet, key, value);
+        if (key.endsWith("Breed")) return pet.breed.toLowerCase() === value.toLowerCase();
+        if (key.endsWith("Activity")) return pet.activity === value;
+        if (key.endsWith("HouseTraining")) return value !== "yes" || pet.trained === "yes";
+        if (key.endsWith("Disability")) return value !== "not-disabled" || pet.disability === "not-disabled";
+        if (key.endsWith("Personality")) return pet.personality === value;
+        if (key === "selectedDogType") return pet.group === value;
+        return false;
+      }
+
+      const profileCards = [...document.querySelectorAll(".profile-card")];
+      profileCards.forEach((card) => {
+        const pet = pets[card.dataset.profile];
+        const matchesSpecies = pet && (!selectedPet || pet.species === selectedPet);
+        const matchesPreferences = matchesSpecies && topRankedAnswers.every((answer) => matchesRankedAnswer(pet, answer));
+        card.hidden = !matchesPreferences;
+
         const openProfile = () => {
           window.location.href = `pet-profile.html?pet=${card.dataset.profile}`;
         };
@@ -105,6 +180,8 @@
           }
         });
       });
+      document.querySelector("#matches-empty").hidden = profileCards.some((card) => !card.hidden);
     </script>
+    <script type="module" src="./src/nav-feedback.js"></script>
   </body>
 </html>

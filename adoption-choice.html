@@ -6,17 +6,17 @@
     <title>Pawmatch - Questionnaire</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page combined-questionnaire-page">
+  <body class="choice-page combined-questionnaire-page questionnaire-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
-          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" />
           <span class="brand-name">Pawmatch</span>
         </a>
 
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="profile.html" class="nav-item">Profile</a>
-          <a href="#" class="nav-item">Questionnaire</a>
+          <a href="match-results.html" class="nav-item">Best Matches</a>
           <a href="available-pets.html" class="nav-item">Available Pets</a>
         </nav>
       </header>
@@ -24,10 +24,12 @@
       <main class="combined-questionnaire">
         <aside class="questionnaire-progress" aria-label="Questionnaire progress">
           <h1>Your perfect match starts here.</h1>
-          <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <span class="progress-fill"></span>
+          <div class="progress-meter">
+            <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-fill"></span>
+            </div>
+            <p class="progress-count" id="progress-count">0%</p>
           </div>
-          <p class="progress-count" id="progress-count">0% Complete</p>
         </aside>
 
         <section class="questionnaire-panel">
@@ -101,7 +103,6 @@
       const progressCount = document.querySelector("#progress-count");
       const progressBar = document.querySelector(".progress-track");
       const progressFill = document.querySelector(".progress-fill");
-      ["selectedPath", "selectedPet", "selectedGender", "selectedAge"].forEach((key) => localStorage.removeItem(key));
       const savedPath = localStorage.getItem("selectedPath");
       const savedPet = localStorage.getItem("selectedPet");
       const savedGender = localStorage.getItem("selectedGender");
@@ -118,7 +119,7 @@
         const answeredCount = ["selectedPath", "selectedPet", "selectedGender", "selectedAge"]
           .filter((key) => localStorage.getItem(key)).length;
         const percentage = answeredCount * 25;
-        progressCount.textContent = `${percentage}% Complete`;
+        progressCount.textContent = `${percentage}%`;
         progressBar.setAttribute("aria-valuemax", "100");
         progressBar.setAttribute("aria-valuenow", percentage);
         progressFill.style.height = `${percentage}%`;
@@ -160,5 +161,7 @@
       refreshNextButton();
       refreshProgress();
     </script>
+    <script type="module" src="./src/questionnaire-back.js"></script>
+    <script type="module" src="./src/nav-feedback.js"></script>
   </body>
 </html>

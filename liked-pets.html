@@ -6,15 +6,26 @@
     <title>Pawmatch - Liked Pets</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page match-results-page">
+  <body class="choice-page match-results-page liked-pets-settings-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
-        <a href="home.html" class="brand"><span class="brand-icon" aria-hidden="true">🐾</span><span class="brand-name">Pawmatch</span></a>
-        <nav class="nav-links" aria-label="Primary navigation"><a href="profile.html" class="nav-item">Profile</a><a href="available-pets.html" class="nav-item">Available Pets</a></nav>
+        <a href="home.html" class="brand"><img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" /><span class="brand-name">Pawmatch</span></a>
+        <nav class="nav-links" aria-label="Primary navigation"><a href="adoption-choice.html" class="nav-item">Questionnaire</a><a href="match-results.html" class="nav-item">Best Matches</a><a href="available-pets.html" class="nav-item">Available Pets</a></nav>
       </header>
-      <main class="matches-content">
-        <div class="matches-heading"><p class="matches-eyebrow">PAWMATCH</p><h1>Liked Pets</h1><p>Pets you saved for a closer look.</p></div>
-        <section class="profile-grid" id="liked-pet-grid" aria-label="Liked pets"></section>
+      <main class="profile-settings-layout liked-pets-settings-layout">
+        <aside class="profile-settings-sidebar" aria-label="Profile settings navigation">
+          <a class="profile-settings-nav" href="profile.html">Profile</a>
+          <a class="profile-settings-nav" href="notifications.html">Notifications</a>
+          <a class="profile-settings-nav" href="password.html">Password</a>
+          <a class="profile-settings-nav is-active" id="liked-pets-tab" href="liked-pets.html" aria-current="page">Saved Pets</a>
+          <button class="profile-settings-nav logout-button" id="logout-button" type="button">Log Out</button>
+        </aside>
+        <section class="profile-settings-content">
+          <section class="matches-content">
+            <div class="matches-heading"><p class="matches-eyebrow">PAWMATCH</p><h1>Liked Pets</h1><p>Pets you saved for a closer look.</p></div>
+            <section class="profile-grid" id="liked-pet-grid" aria-label="Liked pets"></section>
+          </section>
+        </section>
       </main>
     </div>
     <script>
@@ -35,5 +46,6 @@
       });
       if (!grid.children.length) grid.innerHTML = "<p class=\"ranking-empty\">You have not liked any pets yet.</p>";
     </script>
+    <script type="module" src="./src/nav-feedback.js"></script>
   </body>
 </html>

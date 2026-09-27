@@ -9,10 +9,6 @@
   <body class="account-page">
     <div class="account-page-shell">
       <header class="topbar account-page-topbar">
-        <a href="home.html" class="brand">
-          <span class="brand-icon" aria-hidden="true">🐾</span>
-          <span class="brand-name">Pawmatch</span>
-        </a>
       </header>
 
       <main class="account-form-card">
@@ -29,7 +25,7 @@
           <a class="forgot-password-link" href="#">Forgot your password?</a>
 
           <button type="submit">Sign In</button>
-          <a class="account-back-link" href="home.html">Back to Home</a>
+          <a class="account-back-link" href="index.html">Back to Home</a>
         </form>
         <p class="account-form-message" id="sign-in-message" role="alert" aria-live="polite"></p>
       </main>
@@ -47,7 +43,12 @@
         if (!account || account.email !== email || account.password !== password) {
           event.preventDefault();
           signInMessage.textContent = "The email or password does not match our records.";
+          return;
         }
+
+        event.preventDefault();
+        sessionStorage.setItem("pawmatchJustLoggedIn", "true");
+        window.location.href = "home.html";
       });
     </script>
   </body>

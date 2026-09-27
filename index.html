@@ -30,8 +30,20 @@
       </aside>
     </section>
 
+    <dialog class="logout-success-dialog" id="logout-success-dialog" aria-labelledby="logout-success-title">
+      <h2 id="logout-success-title">You Have Been Successfully Loged Out!</h2>
+      <button class="welcome-signup-button" id="dismiss-logout-notice" type="button">Continue</button>
+    </dialog>
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
+      const logoutSuccessDialog = document.querySelector("#logout-success-dialog");
+      if (sessionStorage.getItem("pawmatchLogoutNotice") === "true") {
+        sessionStorage.removeItem("pawmatchLogoutNotice");
+        logoutSuccessDialog.showModal();
+      }
+      document.querySelector("#dismiss-logout-notice").addEventListener("click", () => logoutSuccessDialog.close());
+
       const googleButton = document.querySelector("#google-sign-in-button");
       const googleMessage = document.querySelector("#welcome-google-message");
       const googleClientId = "%VITE_GOOGLE_CLIENT_ID%";
@@ -53,6 +65,7 @@
           if (!apiResponse.ok) throw new Error(result.error || "Google sign-in failed.");
           localStorage.setItem("pawmatchToken", result.token);
           localStorage.setItem("pawmatchAccount", JSON.stringify(result.user));
+          sessionStorage.setItem("pawmatchJustLoggedIn", "true");
           window.location.href = "home.html";
         } catch (error) {
           showGoogleMessage(error.message);
@@ -71,8 +84,18 @@
           googleButton.disabled = false;
           return;
         }
-        window.google.accounts.id.initialize({ client_id: googleClientId, callback: finishGoogleSignIn });
-        window.google.accounts.id.prompt();
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: finishGoogleSignIn,
+          context: "signin",
+          auto_select: false,
+        });
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
+            googleButton.disabled = false;
+            showGoogleMessage("Choose a Google account to continue, or try again.");
+          }
+        });
       }
 
       googleButton.addEventListener("click", () => {

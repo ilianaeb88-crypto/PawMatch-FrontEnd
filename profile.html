@@ -10,11 +10,12 @@
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
-          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" />
           <span class="brand-name">Pawmatch</span>
         </a>
         <nav class="nav-links" aria-label="Primary navigation">
-          <a href="home.html" class="nav-item">Home</a>
+          <a href="adoption-choice.html" class="nav-item">Questionnaire</a>
+          <a href="match-results.html" class="nav-item">Best Matches</a>
           <a href="available-pets.html" class="nav-item">Available Pets</a>
         </nav>
       </header>
@@ -25,6 +26,7 @@
           <a class="profile-settings-nav" href="notifications.html">Notifications</a>
           <a class="profile-settings-nav" href="password.html">Password</a>
           <a class="profile-settings-nav" id="liked-pets-tab" href="liked-pets.html">Saved Pets</a>
+          <button class="profile-settings-nav logout-button" id="logout-button" type="button">Log Out</button>
         </aside>
 
         <section class="profile-settings-content">
@@ -38,11 +40,14 @@
             </div>
 
             <div class="profile-identity">
-              <div class="profile-avatar" aria-hidden="true">A</div>
+              <div class="profile-avatar" aria-hidden="true">
+                <span id="profile-avatar-initial">A</span>
+                <img id="profile-avatar-photo" alt="" hidden />
+              </div>
               <div>
                 <strong id="profile-display-name">Your Profile</strong>
                 <span>Pawmatch member</span>
-                <button class="profile-photo-button" type="button">Change photo</button>
+                <button class="profile-photo-button" id="change-photo-button" type="button">Change photo</button>
               </div>
             </div>
 
@@ -54,77 +59,120 @@
             </div>
             <p class="profile-form-message" id="profile-message" role="status" aria-live="polite"></p>
           </form>
-
-          <section class="profile-settings-card" id="security">
-            <h2>Change Password</h2>
-            <p>Set a new password for your account</p>
-            <form class="profile-password-form" id="profile-password-form">
-              <label>Current password<input type="password" name="current-password" autocomplete="current-password" placeholder="Enter current password" required /></label>
-              <label>New password<input type="password" name="new-password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required /></label>
-              <button class="profile-save-button" type="submit">Update password</button>
-            </form>
-            <p class="profile-form-message" id="password-message" role="status" aria-live="polite"></p>
-          </section>
         </section>
       </main>
     </div>
 
+    <dialog class="photo-upload-dialog" id="photo-upload-dialog" aria-labelledby="photo-upload-title">
+      <form id="photo-upload-form">
+        <div class="photo-upload-heading">
+          <h2 id="photo-upload-title">Upload a profile photo</h2>
+          <button class="photo-upload-close" id="close-photo-dialog" type="button" aria-label="Close">&times;</button>
+        </div>
+        <label class="photo-upload-label" for="profile-photo-input">Choose an image</label>
+        <input id="profile-photo-input" type="file" accept="image/*" />
+        <img class="photo-upload-preview" id="profile-photo-preview" alt="Selected profile photo preview" hidden />
+        <p class="photo-upload-message" id="photo-upload-message" role="status" aria-live="polite">Choose an image up to 2 MB.</p>
+        <div class="photo-upload-actions">
+          <button class="photo-upload-cancel" id="cancel-photo-upload" type="button">Cancel</button>
+          <button class="profile-save-button" type="submit">Upload photo</button>
+        </div>
+      </form>
+    </dialog>
+
     <script>
-      const account = JSON.parse(localStorage.getItem("pawmatchAccount") || "null");
+      let account = JSON.parse(localStorage.getItem("pawmatchAccount") || "null");
       const profileName = document.querySelector("#profile-name");
       const profileEmail = document.querySelector("#profile-email");
       const profileDisplayName = document.querySelector("#profile-display-name");
+      const profileAvatarInitial = document.querySelector("#profile-avatar-initial");
+      const profileAvatarPhoto = document.querySelector("#profile-avatar-photo");
       const profileForm = document.querySelector("#profile-form");
       const profileMessage = document.querySelector("#profile-message");
-      const passwordForm = document.querySelector("#profile-password-form");
-      const passwordMessage = document.querySelector("#password-message");
-      const likedPetsTab = document.querySelector("#liked-pets-tab");
+      const photoDialog = document.querySelector("#photo-upload-dialog");
+      const photoUploadForm = document.querySelector("#photo-upload-form");
+      const photoInput = document.querySelector("#profile-photo-input");
+      const photoPreview = document.querySelector("#profile-photo-preview");
+      const photoUploadMessage = document.querySelector("#photo-upload-message");
+      let selectedPhotoDataUrl = "";
+
+      function displayProfilePhoto(photo) {
+        profileAvatarPhoto.src = photo;
+        profileAvatarPhoto.hidden = !photo;
+        profileAvatarInitial.hidden = Boolean(photo);
+      }
 
       if (account) {
         profileName.value = account.name || "";
         profileEmail.value = account.email || "";
         profileDisplayName.textContent = account.name || "Your Profile";
+        displayProfilePhoto(account.photo || "");
       }
 
-      likedPetsTab.addEventListener("click", (event) => {
-        const likedPets = JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
-        if (likedPets.length) return;
+      document.querySelector("#change-photo-button").addEventListener("click", () => {
+        photoUploadForm.reset();
+        selectedPhotoDataUrl = "";
+        photoPreview.hidden = true;
+        photoUploadMessage.textContent = "Choose an image up to 2 MB.";
+        photoDialog.showModal();
+      });
+
+      document.querySelector("#close-photo-dialog").addEventListener("click", () => photoDialog.close());
+      document.querySelector("#cancel-photo-upload").addEventListener("click", () => photoDialog.close());
+
+      photoInput.addEventListener("change", () => {
+        const file = photoInput.files[0];
+        selectedPhotoDataUrl = "";
+        photoPreview.hidden = true;
+
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+          photoUploadMessage.textContent = "Choose a valid image file.";
+          photoInput.value = "";
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          photoUploadMessage.textContent = "Choose an image smaller than 2 MB.";
+          photoInput.value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          selectedPhotoDataUrl = reader.result;
+          photoPreview.src = selectedPhotoDataUrl;
+          photoPreview.hidden = false;
+          photoUploadMessage.textContent = file.name;
+        });
+        reader.readAsDataURL(file);
+      });
+
+      photoUploadForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        document.querySelector(".no-saved-pets-bubble")?.remove();
-        const bubble = document.createElement("div");
-        bubble.className = "no-saved-pets-bubble";
-        bubble.textContent = "You Have No Saved Pets";
-        document.body.append(bubble);
+        if (!selectedPhotoDataUrl) {
+          photoUploadMessage.textContent = "Choose an image before uploading.";
+          return;
+        }
+
+        account = { ...(account || {}), photo: selectedPhotoDataUrl };
+        localStorage.setItem("pawmatchAccount", JSON.stringify(account));
+        displayProfilePhoto(selectedPhotoDataUrl);
+        profileMessage.textContent = "Profile photo updated.";
+        photoDialog.close();
       });
 
       profileForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const nextAccount = {
+        account = {
           ...(account || {}),
           name: profileName.value.trim(),
           email: profileEmail.value.trim().toLowerCase(),
         };
-        localStorage.setItem("pawmatchAccount", JSON.stringify(nextAccount));
-        profileDisplayName.textContent = nextAccount.name || "Your Profile";
+        localStorage.setItem("pawmatchAccount", JSON.stringify(account));
+        profileDisplayName.textContent = account.name || "Your Profile";
         profileMessage.textContent = "Profile saved.";
       });
-
-      passwordForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const currentPassword = passwordForm.elements["current-password"].value;
-        const newPassword = passwordForm.elements["new-password"].value;
-        const savedAccount = JSON.parse(localStorage.getItem("pawmatchAccount") || "null");
-
-        if (!savedAccount || savedAccount.password !== currentPassword) {
-          passwordMessage.textContent = "The current password does not match our records.";
-          return;
-        }
-
-        savedAccount.password = newPassword;
-        localStorage.setItem("pawmatchAccount", JSON.stringify(savedAccount));
-        passwordMessage.textContent = "Password updated.";
-        passwordForm.reset();
-      });
     </script>
+    <script type="module" src="./src/nav-feedback.js"></script>
   </body>
 </html>

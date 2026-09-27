@@ -10,11 +10,12 @@
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
-          <span class="brand-icon" aria-hidden="true">🐾</span>
+          <img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" />
           <span class="brand-name">Pawmatch</span>
         </a>
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="profile.html" class="nav-item">Profile</a>
+          <a href="adoption-choice.html" class="nav-item">Questionnaire</a>
           <a href="match-results.html" class="nav-item">Best Matches</a>
           <a href="available-pets.html" class="nav-item available-pets-top-button">Available Pets</a>
         </nav>
@@ -69,10 +70,11 @@
 
       const profile = profiles[new URLSearchParams(window.location.search).get("pet")] || profiles.milo;
       const profileParams = new URLSearchParams(window.location.search);
+      const profileSource = profileParams.get("from");
       document.title = `Pawmatch - ${profile.name}`;
-      if (profileParams.get("from") === "available") {
+      if (profileSource === "available" || profileSource === "notifications") {
         document.querySelector("#compatibility-link").remove();
-          document.querySelector("#profile-return").href = "available-pets.html";
+        document.querySelector("#profile-return").href = profileSource === "notifications" ? "notifications.html" : "available-pets.html";
       } else {
         document.querySelector("#compatibility-link").href = `compatibility.html?pet=${profileParams.get("pet") || "milo"}`;
       }
@@ -85,5 +87,6 @@
         document.querySelector(`#pet-${key}`).textContent = profile[key];
       });
     </script>
+    <script type="module" src="./src/nav-feedback.js"></script>
   </body>
 </html>

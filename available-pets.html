@@ -9,10 +9,10 @@
   <body class="choice-page available-pets-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
-        <a href="index.html" class="brand"><span class="brand-icon" aria-hidden="true">🐾</span><span class="brand-name">Pawmatch</span></a>
+        <a href="home.html" class="brand"><img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" /><span class="brand-name">Pawmatch</span></a>
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="profile.html" class="nav-item">Profile</a>
-          <a href="available-pets.html" class="nav-item">Available Pets</a>
+          <a href="match-results.html" class="nav-item">Best Matches</a>
           <a href="adoption-choice.html" class="nav-item">Questionnaire</a>
         </nav>
       </header>
@@ -48,7 +48,7 @@
             <div class="available-pet-meta"><strong>Jarl</strong><span>Male</span><span>1 Year Old</span><span>Labrador Retriever</span></div>
           </article>
         </section>
-        <a class="profile-return available-return" href="index.html">Return</a>
+        <a class="profile-return available-return" id="available-pets-return" href="home.html">Return</a>
       </main>
     </div>
 
@@ -58,10 +58,20 @@
       const search = document.querySelector("#pet-search");
       const likedFilter = document.querySelector("#liked-filter");
       const filters = [...document.querySelectorAll("[data-filter]")];
+      const searchField = search.closest(".pet-search-field");
+
+      function refreshActiveFilterStyles() {
+        filters.forEach((filter) => {
+          filter.classList.toggle("is-filter-active", Boolean(filter.value));
+        });
+        searchField.classList.toggle("is-filter-active", Boolean(search.value.trim()));
+        likedFilter.classList.toggle("is-filter-active", likedFilter.getAttribute("aria-pressed") === "true");
+      }
 
       function applyFilters() {
         const query = search.value.trim().toLowerCase();
         const likedOnly = likedFilter.getAttribute("aria-pressed") === "true";
+        refreshActiveFilterStyles();
         cards.forEach((card) => {
           const matchesSearch = !query || card.dataset.name.toLowerCase().includes(query);
           const matchesFilters = filters.every((filter) => !filter.value || card.dataset[filter.dataset.filter] === filter.value);
@@ -104,6 +114,20 @@
           window.location.href = `pet-profile.html?pet=${card.dataset.profile}&from=available`;
         });
       });
+
+      document.querySelector("#available-pets-return").addEventListener("click", (event) => {
+        try {
+          const previousPage = new URL(document.referrer);
+          if (previousPage.origin !== window.location.origin || previousPage.href === window.location.href) return;
+          event.preventDefault();
+          window.history.back();
+        } catch {
+          // The Home link remains the fallback when there is no usable referrer.
+        }
+      });
+
+      applyFilters();
     </script>
+    <script type="module" src="./src/nav-feedback.js"></script>
   </body>
 </html>
