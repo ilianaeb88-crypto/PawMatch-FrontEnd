@@ -42,7 +42,7 @@
         card.className = "profile-card";
         card.tabIndex = 0;
         card.innerHTML = `<div class="profile-image-wrap"><img src="${pet.image}" alt="${pet.name}, ${pet.breed}" class="profile-image" /></div><div class="profile-details"><h2>${pet.name}</h2><p class="profile-type">${pet.breed}</p><dl class="profile-facts"><div><dt>Gender</dt><dd>${pet.gender}</dd></div><div><dt>Age</dt><dd>${pet.age}</dd></div></dl></div>`;
-        card.addEventListener("click", () => { window.location.href = `pet-profile.html?pet=${likedPets[pet.name.toLowerCase()] ? pet.name.toLowerCase() : "luna"}&from=available`; });
+        card.addEventListener("click", () => { window.location.href = `pet-profile.html?pet=${likedPets[pet.name.toLowerCase()] ? pet.name.toLowerCase() : "luna"}&from=liked`; });
         grid.append(card);
       });
       if (!grid.children.length) grid.innerHTML = "<p class=\"ranking-empty\">You have not liked any pets yet.</p>";

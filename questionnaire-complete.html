@@ -14,9 +14,11 @@
       </main>
     </div>
 
-    <script>
+    <script type="module">
+      import { markQuestionnaireComplete } from "./src/questionnaire-state.js";
+
       document.addEventListener("click", () => {
-        localStorage.setItem("questionnaireCompleted", "true");
+        markQuestionnaireComplete();
         window.location.href = "match-results.html";
       });
     </script>

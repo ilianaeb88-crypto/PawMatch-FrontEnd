@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pawmatch - Compatibility</title>
     <link rel="stylesheet" href="styles.css" />
-    <script>
-      if (localStorage.getItem("questionnaireCompleted") !== "true") {
+    <script type="module">
+      import { isQuestionnaireComplete } from "./src/questionnaire-state.js";
+
+      if (!isQuestionnaireComplete()) {
         window.location.replace("adoption-choice.html");
+      } else {
+        document.body.hidden = false;
       }
     </script>
   </head>
-  <body class="choice-page compatibility-page">
+  <body class="choice-page compatibility-page" hidden>
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
@@ -37,155 +41,22 @@
       </main>
     </div>
 
-    <script>
-      const compatibilityProfiles = {
-        milo: { name: "Milo", score: "98% Match", traits: { Breed: "Border Collie Mix", Age: "3 Years Old", Gender: "Male", Weight: "45 Pounds", Activity: "Very Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Social", Path: "Adoption", Children: "Good with children", Cats: "Good with cats", Dogs: "Good with dogs", Exercise: "high" } },
-        luna: { name: "Luna", score: "95% Match", traits: { Breed: "Domestic Shorthair", Age: "2 Years Old", Gender: "Female", Weight: "8 Pounds", Activity: "Moderately Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Reserved", Path: "Adoption", Children: "Good with children", Cats: "Good with cats", Dogs: "Good with dogs", Exercise: "low" } },
-        bear: { name: "Bear", score: "91% Match", traits: { Breed: "Corgi Mix", Age: "5 Years Old", Gender: "Male", Weight: "35 Pounds", Activity: "Moderately Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Social", Path: "Foster", Children: "Good with children", Cats: "Not good with cats", Dogs: "Good with dogs", Exercise: "low" } },
-        cleo: { name: "Cleo", score: "88% Match", traits: { Breed: "Calico", Age: "4 Years Old", Gender: "Female", Weight: "9 Pounds", Activity: "Non-Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Reserved", Path: "Adoption", Children: "Not good with children", Cats: "Good with cats", Dogs: "Not good with dogs", Exercise: "low" } },
-        sayana: { name: "Sayana", score: "90% Match", traits: { Breed: "Pug", Age: "2 Years Old", Gender: "Female", Weight: "16 Pounds", Activity: "Moderately Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Social", Path: "Adoption", Children: "Good with children", Cats: "Good with cats", Dogs: "Good with dogs", Exercise: "low" } }
-      };
+    <script type="module">
+      import { getCompatibility } from "./src/compatibility.js";
 
-      const petId = new URLSearchParams(window.location.search).get("pet") || "milo";
-      const petPrefix = petId === "luna" || petId === "cleo" ? "Cat" : "Dog";
-      const answerDefinitions = [
-        { label: "Gender", key: "selectedGender", values: { male: "Male", female: "Female", any: "No Preference" }, trait: "Gender" },
-        { label: "Age", key: "selectedAge", values: { "less-than-6-months": "0-1 (Baby)", "1-3": "1-3 (Young)", "3-7": "3-7 (Adult)", "greater-than-7": "Greater than 7 (Senior)" }, trait: "Age" },
-        { label: "Weight", key: petPrefix === "Cat" ? "selectedCatWeight" : "selectedWeight", format: (value) => `${value.replaceAll("greater-than-", "Greater than ")} Pounds`, trait: "Weight" },
-        { label: "Breed", key: `selected${petPrefix}Breed`, trait: "Breed" },
-        { label: "Hair Length", key: `selected${petPrefix}HairLength`, values: { "long-hair": "Long-Hair", "short-hair": "Short-Hair" }, trait: "Hair Length" },
-        { label: "Activity Level", key: `selected${petPrefix}Activity`, values: { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active", "no-preference": "No Preference" }, trait: "Activity" },
-        { label: "House Training", key: `selected${petPrefix}HouseTraining`, values: { yes: "House Trained", no: "No Preference" }, trait: "Trained" },
-        { label: "Disability", key: `selected${petPrefix}Disability`, values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" }, trait: "Disability" },
-        ...(petPrefix === "Dog" ? [
-          { label: "Dog Group", key: "selectedDogType", trait: "Dog Group" },
-          { label: "Protectivity", key: "selectedDogProtective", values: { protective: "Protective", "not-protective": "Not Protective" }, trait: "Protectivity" },
-          { label: "Barking", key: "selectedDogBarking", values: { "does-not-matter": "Barking Does Not Matter", "does-not-bark": "Low Barking" }, trait: "Barking" },
-          { label: "Shedding", key: "selectedDogShedding", values: { "does-not-shed": "Does Not Shed", "shedding-does-not-matter": "Shedding Does Not Matter" }, trait: "Shedding" },
-        ] : []),
-        { label: "Personality", key: `selected${petPrefix}Personality`, values: { social: "Social", reserved: "Reserved", "no-preference": "No Preference" }, trait: "Sociability" },
-      ];
-
-      const profile = compatibilityProfiles[petId] || compatibilityProfiles.milo;
-      const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
+      const from = new URLSearchParams(window.location.search).get("from");
+      const { petId, profile, rows, earnedPoints, totalPoints, percent } = getCompatibility(new URLSearchParams(window.location.search).get("pet"));
       document.title = `Pawmatch - ${profile.name} Compatibility`;
       document.querySelector("#compatibility-name").textContent = profile.name;
-
-      function getAnswerLabel(definition, value) {
-        if (definition.values && definition.values[value]) return definition.values[value];
-        if (definition.format) return definition.format(value);
-        return value.replaceAll("-", " ");
-      }
-
-      function isNoPreferenceAnswer(definition, value) {
-        const normalizedValue = value.trim().toLowerCase();
-        return normalizedValue === "any"
-          || normalizedValue === "no-preference"
-          || normalizedValue === "any-disability"
-          || normalizedValue.endsWith("does-not-matter")
-          || getAnswerLabel(definition, value).trim().toLowerCase() === "no preference";
-      }
-
-      document.querySelector("#compatibility-return").href = `pet-profile.html?pet=${petId}`;
-
-      const comparisons = answerDefinitions.map((definition) => ({
-          ...definition,
-          value: localStorage.getItem(definition.key),
-        })).filter((comparison) => comparison.value
-          && Object.prototype.hasOwnProperty.call(savedRanks, comparison.key)
-          && !isNoPreferenceAnswer(comparison, comparison.value));
-      comparisons.sort((first, second) => savedRanks[first.key] - savedRanks[second.key]);
-
-      const slug = (text) => String(text || "").trim().toLowerCase().replaceAll(" ", "-");
-
-      function matchesAnswer(comparison) {
-        const { key, value } = comparison;
-        const trait = profile.traits[comparison.trait];
-        if (!trait) return false;
-        if (key === "selectedGender") return slug(trait) === value;
-        if (key === "selectedAge") {
-          const age = parseFloat(trait);
-          if (value === "less-than-6-months") return age < 0.5;
-          if (value === "1-3") return age >= 1 && age < 3;
-          if (value === "3-7") return age >= 3 && age <= 7;
-          return age > 7;
-        }
-        if (key === "selectedCatWeight") {
-          const weight = parseFloat(trait);
-          if (Number.isNaN(weight)) return false;
-          if (value === "greater-than-25") return weight > 25;
-          const [minimum, maximum] = value.split("-").map(Number);
-          return weight >= minimum && weight <= maximum;
-        }
-        if (key === "selectedWeight") {
-          const sizeByRange = { "0-10": "small", "10-30": "small", "30-50": "medium", "50-70": "medium", "70-90": "large", "90-110": "large", "greater-than-110": "large" };
-          const pounds = parseFloat(trait);
-          const size = pounds <= 30 ? "small" : pounds <= 70 ? "medium" : "large";
-          return sizeByRange[value] === size;
-        }
-        if (key.endsWith("Breed")) return trait.toLowerCase() === value.toLowerCase();
-        if (key.endsWith("HouseTraining")) return value !== "yes" || trait === "Yes";
-        if (key.endsWith("Disability")) return value !== "not-disabled" || trait === "Not Disabled";
-        return slug(trait) === value;
-      }
-
-      const rankPoints = (rank) => (rank >= 10 ? 2 : 16 - rank);
-      let earnedPoints = 0;
-      let totalPoints = 0;
-      const pathAnswer = localStorage.getItem("selectedPath");
-      const speciesAnswer = localStorage.getItem("selectedPet");
-      if (pathAnswer) {
-        totalPoints += 15;
-        if (slug(profile.traits.Path) === (pathAnswer === "adopt" ? "adoption" : "foster")) earnedPoints += 15;
-      }
-      if (speciesAnswer) {
-        totalPoints += 15;
-        if (speciesAnswer === petPrefix.toLowerCase()) earnedPoints += 15;
-      }
-      comparisons.forEach((comparison) => {
-        const points = rankPoints(savedRanks[comparison.key]);
-        totalPoints += points;
-        if (matchesAnswer(comparison)) earnedPoints += points;
-      });
-      const totalPercent = totalPoints ? Math.round((earnedPoints / totalPoints) * 100) : 0;
+      document.querySelector("#compatibility-return").href = `pet-profile.html?pet=${petId}${from ? `&from=${from}` : ""}`;
       document.querySelector("#compatibility-total").textContent = `Total Compatibility: ${earnedPoints}/${totalPoints}`;
-      document.querySelector("#compatibility-percent").textContent = `${totalPercent}% Match`;
-      const answerOf = (key) => localStorage.getItem(key);
-      const extraRows = [];
-      if (answerOf("selectedChildrenUnderTwelve") === "yes") {
-        extraRows.push({ rating: 4, answer: "Has Children 12 or Under", characteristic: profile.traits.Children });
-      }
-      const otherPets = answerOf("selectedOtherPets");
-      if (otherPets === "cat" || otherPets === "dog-and-cat") {
-        extraRows.push({ rating: 4, answer: "Owns a Cat", characteristic: profile.traits.Cats });
-      }
-      if (otherPets === "dog" || otherPets === "dog-and-cat") {
-        extraRows.push({ rating: 4, answer: "Owns a Dog", characteristic: profile.traits.Dogs });
-      }
-      const yardAnswer = answerOf("selectedYardOrWalks");
-      if (yardAnswer && petPrefix === "Dog") {
-        const yardLabels = { "500-or-greater": "500sqft or Greater Yard", "less-than-500": "Less than 500sqft Yard", "daily-walks": "Daily Walks", "weekly-walks": "Weekly Walks", both: "500sqft or Greater Yard and Daily Walks", neither: "No Large Yard or Daily Walks" };
-        const canExercise = ["500-or-greater", "daily-walks", "both"].includes(yardAnswer);
-        const needsExercise = profile.traits.Exercise === "high" || profile.traits.Activity === "Very Active" || parseFloat(profile.traits.Weight) > 70;
-        let characteristic = "Low exercise needs";
-        if (needsExercise) characteristic = canExercise ? "Hyper/Large - Your Space or Walks Are a Match" : "Hyper/Large - Needs More Space or Daily Walks";
-        extraRows.push({ answer: yardLabels[yardAnswer] || yardAnswer, characteristic });
-      }
+      document.querySelector("#compatibility-percent").textContent = `${percent}% Match`;
 
       const comparisonList = document.querySelector("#comparison-list");
-
-      comparisons.forEach((comparison) => {
-        const row = document.createElement("div");
-        const answer = getAnswerLabel(comparison, comparison.value);
-        const characteristic = comparison.trait === "Trained" && profile.traits.Trained === "Yes" ? "House Trained" : profile.traits[comparison.trait];
-        row.className = "comparison-row";
-        row.innerHTML = `<span>${answer}</span><span>${savedRanks[comparison.key]}</span><span>${characteristic || "Not provided"}</span>`;
-        comparisonList.append(row);
-      });
-      extraRows.forEach((extra) => {
+      rows.filter((rowData) => !rowData.hidden).forEach((rowData) => {
         const row = document.createElement("div");
         row.className = "comparison-row";
-        row.innerHTML = `<span>${extra.answer}</span><span>${extra.rating || "-"}</span><span>${extra.characteristic || "Not provided"}</span>`;
+        row.innerHTML = `<span>${rowData.answer}</span><span>${rowData.earned}/${rowData.points}</span><span>${rowData.characteristic || "Not provided"}</span>`;
         comparisonList.append(row);
       });
     </script>

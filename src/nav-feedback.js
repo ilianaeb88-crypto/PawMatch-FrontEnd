@@ -1,3 +1,5 @@
+import { isQuestionnaireComplete } from "./questionnaire-state.js";
+
 let activeNotice;
 let activeNoticeTimeout;
 
@@ -7,10 +9,6 @@ function parseStoredValue(key, fallback) {
   } catch {
     return fallback;
   }
-}
-
-function isQuestionnaireComplete() {
-  return localStorage.getItem("questionnaireCompleted") === "true";
 }
 
 function clearQuestionnaireAnswers() {

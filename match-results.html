@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pawmatch - Your Matches</title>
     <link rel="stylesheet" href="styles.css" />
-    <script>
-      if (localStorage.getItem("questionnaireCompleted") !== "true") {
+    <script type="module">
+      import { isQuestionnaireComplete } from "./src/questionnaire-state.js";
+
+      if (!isQuestionnaireComplete()) {
         window.location.replace("home.html");
+      } else {
+        document.body.hidden = false;
       }
     </script>
   </head>
-  <body class="choice-page match-results-page">
+  <body class="choice-page match-results-page" hidden>
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
@@ -104,7 +108,7 @@
         .filter((answer) => {
           if (!answer.value || !Number.isFinite(answer.rank)) return false;
           const normalizedValue = answer.value.trim().toLowerCase();
-          if (["any", "no-preference", "no", "no preference"].includes(normalizedValue)) return false;
+          if (["any", "no-preference", "no", "no preference", "not-protective"].includes(normalizedValue)) return false;
           if (answer.key === "selectedWeight" || answer.key.startsWith("selectedDog")) return selectedPet === "dog";
           if (answer.key.startsWith("selectedCat")) return selectedPet === "cat";
           return true;
@@ -169,7 +173,7 @@
         card.hidden = !matchesPreferences;
 
         const openProfile = () => {
-          window.location.href = `pet-profile.html?pet=${card.dataset.profile}`;
+          window.location.href = `pet-profile.html?pet=${card.dataset.profile}&from=matches`;
         };
 
         card.addEventListener("click", openProfile);

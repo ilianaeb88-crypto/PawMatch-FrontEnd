@@ -20,5 +20,5 @@
 ## Project-specific conventions
 
 - Keep page navigation consistent with the explicit filenames in `vite.config.js`. Shared scripts are opt-in: add their `<script type="module">` include to each page that needs the behavior.
-- Questionnaire answers and ranking use browser `localStorage` (keys such as `selectedPath`, `selectedPet`, `selectedCat…`, `selectedDog…`, `answerRanks`, and `questionnaireCompleted`). Session-only notices use `sessionStorage`. Update readers, writers, and reset/guard logic together when changing this state contract.
+- Questionnaire answers and ranking use browser `localStorage` (keys such as `selectedPath`, `selectedPet`, `selectedCat…`, `selectedDog…`, and `answerRanks`). Completion is recorded per account email by `src/questionnaire-state.js`, with a guest key when no account email is stored. Session-only notices use `sessionStorage`. Update readers, writers, and reset/guard logic together when changing this state contract.
 - Google sign-in is configured through Vite variables `VITE_GOOGLE_CLIENT_ID` and `VITE_API_BASE_URL`; `.env.example` shows the expected local values. The frontend posts the Google credential to `POST /api/auth/google` and expects `{ token, user }`; the backend is responsible for verifying the credential. Do not put credentials in source files.

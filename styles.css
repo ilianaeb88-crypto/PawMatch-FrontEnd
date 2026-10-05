@@ -374,6 +374,23 @@ body {
   text-align: center;
 }
 
+.welcome-or-divider {
+  text-align: center;
+  font-weight: 700;
+  color: #4a1d0f;
+  margin: calc(-0.25in) 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.welcome-or-divider::before,
+.welcome-or-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 2px solid #4a1d0f;
+}
+
 .welcome-google-button {
   display: inline-flex;
   align-items: center;
