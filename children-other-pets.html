@@ -22,7 +22,7 @@
       <main class="combined-questionnaire">
         <aside class="questionnaire-progress" aria-label="Questionnaire progress">
           <h1>Your perfect match starts here.</h1>
-          <div class="progress-meter">
+          <div class="progress-meter" data-question-count="3">
             <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <span class="progress-fill"></span>
             </div>
@@ -50,6 +50,17 @@
               <button class="choice-option choice-option-secondary" type="button" data-group="other-pets" data-choice="neither">Neither</button>
             </div>
           </fieldset>
+          <fieldset class="question-group">
+            <legend>Do You Have a Yard Around 500sqft or Greater and/or Will You Take Your Dog for Daily Walks?</legend>
+            <div class="question-options question-options-five">
+              <button class="choice-option choice-option-primary" type="button" data-group="yard-walks" data-choice="500-or-greater">500sqft or Greater</button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="yard-walks" data-choice="less-than-500">Less than 500sqft</button>
+              <button class="choice-option choice-option-primary" type="button" data-group="yard-walks" data-choice="daily-walks">Daily Walks</button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="yard-walks" data-choice="weekly-walks">Weekly Walks</button>
+              <button class="choice-option choice-option-primary" type="button" data-group="yard-walks" data-choice="both">Both</button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="yard-walks" data-choice="neither">Neither</button>
+            </div>
+          </fieldset>
 
           <div class="dog-breed-actions">
             <a class="back-button" href="cat-activity-level.html">Back</a>
@@ -68,15 +79,16 @@
       const storageKeys = {
         children: "selectedChildrenUnderTwelve",
         "other-pets": "selectedOtherPets",
+        "yard-walks": "selectedYardOrWalks",
       };
 
       function refreshProgress() {
         const answeredCount = Object.values(storageKeys).filter((key) => localStorage.getItem(key)).length;
-        const percentage = answeredCount * 50;
+        const percentage = Math.round((answeredCount / 3) * 100);
         progressCount.textContent = `${percentage}%`;
         progressBar.setAttribute("aria-valuenow", percentage);
         progressFill.style.height = `${percentage}%`;
-        nextButton.disabled = answeredCount < 2;
+        nextButton.disabled = answeredCount < 3;
       }
 
       choiceButtons.forEach((button) => {

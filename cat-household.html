@@ -3,17 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pawmatch - Choose Barking Preference</title>
+    <title>Pawmatch - Household Questions</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page combined-questionnaire-page dog-details-page questionnaire-page">
+  <body class="choice-page combined-questionnaire-page questionnaire-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
         <a href="home.html" class="brand">
           <img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" />
           <span class="brand-name">Pawmatch</span>
         </a>
-
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="#" class="nav-item">Profile</a>
           <a href="available-pets.html" class="nav-item">Available Pets</a>
@@ -23,7 +22,7 @@
       <main class="combined-questionnaire">
         <aside class="questionnaire-progress" aria-label="Questionnaire progress">
           <h1>Your perfect match starts here.</h1>
-          <div class="progress-meter" data-question-count="5">
+          <div class="progress-meter" data-question-count="2">
             <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <span class="progress-fill"></span>
             </div>
@@ -32,23 +31,7 @@
         </aside>
 
         <section class="questionnaire-panel">
-          <h1>Tell Us More About Your Dog</h1>
-
-          <fieldset class="question-group">
-            <legend>Do you care if your dog barks?</legend>
-            <div class="question-options">
-              <button class="choice-option choice-option-primary" type="button" data-group="barking" data-choice="does-not-matter">Yes</button>
-              <button class="choice-option choice-option-secondary" type="button" data-group="barking" data-choice="does-not-bark">No</button>
-            </div>
-          </fieldset>
-
-          <fieldset class="question-group">
-            <legend>Do you care about shedding?</legend>
-            <div class="question-options">
-              <button class="choice-option choice-option-primary" type="button" data-group="shedding" data-choice="does-not-shed">Yes</button>
-              <button class="choice-option choice-option-secondary" type="button" data-group="shedding" data-choice="shedding-does-not-matter">No</button>
-            </div>
-          </fieldset>
+          <h1>Tell Us About Your Home</h1>
 
           <fieldset class="question-group">
             <legend>Do you have any children 12 or under?</legend>
@@ -67,21 +50,9 @@
               <button class="choice-option choice-option-secondary" type="button" data-group="other-pets" data-choice="neither">Neither</button>
             </div>
           </fieldset>
-          <fieldset class="question-group">
-            <legend>Do You Have a Yard Around 500sqft or Greater and/or Will You Take Your Dog for Daily Walks?</legend>
-            <div class="question-options question-options-five">
-              <button class="choice-option choice-option-primary" type="button" data-group="yard-walks" data-choice="500-or-greater">500sqft or Greater</button>
-              <button class="choice-option choice-option-secondary" type="button" data-group="yard-walks" data-choice="less-than-500">Less than 500sqft</button>
-              <button class="choice-option choice-option-primary" type="button" data-group="yard-walks" data-choice="daily-walks">Daily Walks</button>
-              <button class="choice-option choice-option-secondary" type="button" data-group="yard-walks" data-choice="weekly-walks">Weekly Walks</button>
-              <button class="choice-option choice-option-primary" type="button" data-group="yard-walks" data-choice="both">Both</button>
-              <button class="choice-option choice-option-secondary" type="button" data-group="yard-walks" data-choice="neither">Neither</button>
-            </div>
-          </fieldset>
-
           <div class="dog-breed-actions">
-            <a class="back-button" href="dog-activity-level.html">Back</a>
-            <button class="questionnaire-next" id="dog-household-next" type="button" disabled>Next</button>
+            <a class="back-button" href="cat-activity-level.html">Back</a>
+            <button class="questionnaire-next" id="household-next" type="button" disabled>Next</button>
           </div>
         </section>
       </main>
@@ -89,33 +60,27 @@
 
     <script>
       const choiceButtons = document.querySelectorAll(".choice-option");
-      const nextButton = document.querySelector("#dog-household-next");
+      const nextButton = document.querySelector("#household-next");
       const progressCount = document.querySelector("#progress-count");
       const progressBar = document.querySelector(".progress-track");
       const progressFill = document.querySelector(".progress-fill");
       const storageKeys = {
-        barking: "selectedDogBarking",
-        shedding: "selectedDogShedding",
         children: "selectedChildrenUnderTwelve",
         "other-pets": "selectedOtherPets",
-        "yard-walks": "selectedYardOrWalks",
       };
 
       function refreshProgress() {
         const answeredCount = Object.values(storageKeys).filter((key) => localStorage.getItem(key)).length;
-        const percentage = answeredCount * 20;
+        const percentage = answeredCount * 50;
         progressCount.textContent = `${percentage}%`;
         progressBar.setAttribute("aria-valuenow", percentage);
         progressFill.style.height = `${percentage}%`;
-        nextButton.disabled = answeredCount < 5;
+        nextButton.disabled = answeredCount < 2;
       }
 
       choiceButtons.forEach((button) => {
         const storageKey = storageKeys[button.dataset.group];
-        if (button.dataset.choice === localStorage.getItem(storageKey)) {
-          button.classList.add("is-selected");
-        }
-
+        if (button.dataset.choice === localStorage.getItem(storageKey)) button.classList.add("is-selected");
         button.addEventListener("click", () => {
           document.querySelectorAll(`[data-group="${button.dataset.group}"]`).forEach((option) => option.classList.remove("is-selected"));
           button.classList.add("is-selected");

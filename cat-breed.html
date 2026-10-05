@@ -23,7 +23,7 @@
       <main class="combined-questionnaire">
         <aside class="questionnaire-progress" aria-label="Questionnaire progress">
           <h1>Your perfect match starts here.</h1>
-          <div class="progress-meter">
+          <div class="progress-meter" data-question-count="3">
             <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <span class="progress-fill"></span>
             </div>
@@ -90,7 +90,6 @@
           <option>Tonkinese</option>
           <option>Turkish Angora</option>
           <option>Turkish Van</option>
-          <option>Mixed Breed</option>
           <option>No Preference</option>
         </select>
         </div>
@@ -104,6 +103,15 @@
               <button class="choice-option choice-option-secondary" type="button" data-weight="15-20">15-20 Pounds</button>
               <button class="choice-option choice-option-primary" type="button" data-weight="greater-than-25">Greater than 25 Pounds</button>
               <button class="choice-option choice-option-secondary" type="button" data-weight="no-preference">No Preference</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="question-group">
+            <legend>Would you prefer a long or short haired cat?</legend>
+            <div class="question-options question-options-three">
+              <button class="choice-option choice-option-primary" type="button" data-hair="long-hair">Long-Hair</button>
+              <button class="choice-option choice-option-secondary" type="button" data-hair="short-hair">Short-Hair</button>
+              <button class="choice-option choice-option-primary" type="button" data-hair="no-preference">No Preference</button>
             </div>
           </fieldset>
 
@@ -121,6 +129,7 @@
       const breedTrigger = document.createElement("button");
       const breedMenu = document.createElement("div");
       const weightButtons = document.querySelectorAll("[data-weight]");
+      const hairButtons = document.querySelectorAll("[data-hair]");
       const nextButton = document.querySelector("#cat-breed-next");
       const savedBreed = localStorage.getItem("selectedCatBreed");
       const progressCount = document.querySelector("#progress-count");
@@ -128,14 +137,26 @@
       const progressFill = document.querySelector(".progress-fill");
 
       function refreshProgress() {
-        const answeredCount = ["selectedCatWeight", "selectedCatBreed"]
+        const answeredCount = ["selectedCatWeight", "selectedCatBreed", "selectedCatHairLength"]
           .filter((key) => localStorage.getItem(key)).length;
-        const percentage = answeredCount * 50;
+        const percentage = Math.round((answeredCount / 3) * 100);
         progressCount.textContent = `${percentage}%`;
         progressBar.setAttribute("aria-valuenow", percentage);
         progressFill.style.height = `${percentage}%`;
-        nextButton.disabled = answeredCount < 2;
+        nextButton.disabled = answeredCount < 3;
       }
+
+      hairButtons.forEach((button) => {
+        if (button.dataset.hair === localStorage.getItem("selectedCatHairLength")) {
+          button.classList.add("is-selected");
+        }
+        button.addEventListener("click", () => {
+          hairButtons.forEach((hairButton) => hairButton.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedCatHairLength", button.dataset.hair);
+          refreshProgress();
+        });
+      });
 
       weightButtons.forEach((button) => {
         if (button.dataset.weight === localStorage.getItem("selectedCatWeight")) {
@@ -186,9 +207,7 @@
 
       nextButton.addEventListener("click", () => {
         if (nextButton.disabled) return;
-        window.location.href = breedSelect.value === "No Preference"
-          ? "cat-hair-length.html"
-          : "cat-activity-level.html";
+        window.location.href = "cat-activity-level.html";
       });
       refreshProgress();
     </script>

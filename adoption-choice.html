@@ -24,7 +24,7 @@
       <main class="combined-questionnaire">
         <aside class="questionnaire-progress" aria-label="Questionnaire progress">
           <h1>Your perfect match starts here.</h1>
-          <div class="progress-meter">
+          <div class="progress-meter" data-question-count="4">
             <div class="progress-track" role="progressbar" aria-label="Questionnaire progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <span class="progress-fill"></span>
             </div>
@@ -82,12 +82,13 @@
           </fieldset>
 
           <fieldset class="question-group">
-            <legend>How old do you want your pet to be?</legend>
-            <div class="question-options question-options-four">
+            <legend>What is the age of your ideal pet?</legend>
+            <div class="question-options question-options-five">
               <button class="choice-option choice-option-primary" type="button" data-group="age" data-choice="less-than-6-months">0-1 (Baby)</button>
               <button class="choice-option choice-option-secondary" type="button" data-group="age" data-choice="1-3">1-3 (Young)</button>
               <button class="choice-option choice-option-secondary" type="button" data-group="age" data-choice="3-7">3-7 (Adult)</button>
               <button class="choice-option choice-option-primary" type="button" data-group="age" data-choice="greater-than-7">Greater than 7 (Senior)</button>
+              <button class="choice-option choice-option-secondary" type="button" data-group="age" data-choice="any">No Preference</button>
             </div>
           </fieldset>
 
@@ -103,6 +104,9 @@
       const progressCount = document.querySelector("#progress-count");
       const progressBar = document.querySelector(".progress-track");
       const progressFill = document.querySelector(".progress-fill");
+      localStorage.removeItem("selectedChildrenUnderTwelve");
+      localStorage.removeItem("selectedOtherPets");
+      localStorage.removeItem("selectedYardOrWalks");
       const savedPath = localStorage.getItem("selectedPath");
       const savedPet = localStorage.getItem("selectedPet");
       const savedGender = localStorage.getItem("selectedGender");

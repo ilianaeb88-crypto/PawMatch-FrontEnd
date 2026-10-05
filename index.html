@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pawmatch - Sign Up</title>
+    <title>Welcome to PawMatch</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -11,13 +11,11 @@
       <div class="account-overlay-card">
         <div class="account-choice-content">
           <p class="account-eyebrow">PAWMATCH</p>
-          <h2>Sign up</h2>
-          <p class="account-choice-intro">Create and account and begin your search for the perfect companion. <a href="sign-in.html">Log in here</a></p>
+          <h2>Welcome to PawMatch</h2>
+          <p class="account-choice-intro">Create an account and begin your search for the perfect companion or log in to continue your search.</p>
           <form class="welcome-signup-form" action="create-account.html">
-            <label class="visually-hidden" for="welcome-email">Email address</label>
-            <input id="welcome-email" name="email" type="email" placeholder="Email address" autocomplete="email" required />
+            <button class="welcome-signup-button" id="welcome-login-button" type="button">Log in</button>
             <button class="welcome-signup-button" type="submit">Sign Up</button>
-            <span class="welcome-form-divider">OR</span>
             <button class="welcome-google-button" id="google-sign-in-button" type="button"><span class="google-icon" aria-hidden="true">G</span>Continue with Google</button>
           </form>
           <p class="welcome-form-message" id="welcome-google-message" role="alert" aria-live="polite"></p>
@@ -46,6 +44,9 @@
 
       const googleButton = document.querySelector("#google-sign-in-button");
       const googleMessage = document.querySelector("#welcome-google-message");
+      document.querySelector("#welcome-login-button").addEventListener("click", () => {
+        window.location.href = "sign-in.html";
+      });
       const googleClientId = "%VITE_GOOGLE_CLIENT_ID%";
       const configuredApiBaseUrl = "%VITE_API_BASE_URL%";
       const apiBaseUrl = configuredApiBaseUrl.startsWith("%VITE_") ? "http://localhost:4000/api" : configuredApiBaseUrl;
@@ -107,6 +108,9 @@
       localStorage.removeItem("selectedPet");
       localStorage.removeItem("selectedGender");
       localStorage.removeItem("selectedAge");
+      localStorage.removeItem("selectedChildrenUnderTwelve");
+      localStorage.removeItem("selectedOtherPets");
+      localStorage.removeItem("selectedYardOrWalks");
     </script>
   </body>
 </html>

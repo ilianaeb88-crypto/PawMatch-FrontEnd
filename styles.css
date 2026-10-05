@@ -326,7 +326,7 @@ body {
 
 .welcome-signup-form {
   display: grid;
-  gap: 0.8rem;
+  gap: calc(0.8rem + 0.25in);
 }
 
 .welcome-signup-form input,
@@ -978,7 +978,7 @@ body {
 
 .combined-questionnaire {
   display: grid;
-  grid-template-columns: minmax(240px, 0.34fr) minmax(0, 0.66fr);
+  grid-template-columns: minmax(0, 0.66fr) minmax(240px, 0.34fr);
   flex: 1;
   margin: 0 1.25rem 1rem;
   overflow: hidden;
@@ -987,6 +987,7 @@ body {
 }
 
 .questionnaire-panel {
+  grid-column: 1;
   width: 100%;
   box-sizing: border-box;
   margin: 0 auto;
@@ -1044,6 +1045,8 @@ body {
 }
 
 .questionnaire-progress {
+  grid-column: 2;
+  grid-row: 1;
   position: relative;
   overflow: hidden;
   align-self: stretch;
@@ -1212,6 +1215,11 @@ body {
   z-index: 1;
 }
 
+.questionnaire-progress > h1,
+.progress-count {
+  display: none;
+}
+
 .questionnaire-progress-eyebrow {
   margin: 0;
   color: #8b2d1a;
@@ -1236,18 +1244,75 @@ body {
 
 .progress-meter {
   position: relative;
-  width: calc(0.7rem + 1in);
+  width: auto;
   margin: 3rem auto 0;
 }
 
-.progress-track {
-  width: 100%;
-  height: calc(min(42vh, 22rem) + 2in);
-  margin: 0;
+.questionnaire-step-progress {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.25rem, 0.8vw, 0.65rem);
+  width: min(100%, 600px);
+  margin: 0 0 1.5rem;
+}
+
+.questionnaire-progress-segment {
+  flex: 1;
+  height: 1rem;
   overflow: hidden;
+  border: 2px solid #8b2d1a;
   border-radius: 999px;
   background: rgba(255, 250, 243, 0.72);
-  transform: rotate(180deg);
+}
+
+.questionnaire-progress-segment-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #b15b1c;
+  transition: width 0.35s ease;
+}
+
+.questionnaire-progress-paw-marker {
+  flex: 0 0 auto;
+  color: #8b2d1a;
+  line-height: 0;
+  opacity: 0.5;
+  transform: scale(0.85);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.questionnaire-progress-paw-marker svg {
+  display: block;
+  width: 1.9rem;
+  height: 1.9rem;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 5;
+  stroke-linejoin: round;
+  transition: fill 0.2s ease;
+}
+
+.questionnaire-progress-paw-marker.is-active {
+  opacity: 1;
+  transform: scale(1.25);
+  animation: questionnaire-paw-pop 0.35s ease-out;
+}
+
+.questionnaire-progress-paw-marker.is-active svg {
+  fill: currentColor;
+}
+
+@keyframes questionnaire-paw-pop {
+  50% {
+    transform: scale(1.55);
+  }
+}
+
+.progress-track {
+  display: none;
 }
 
 .progress-fill {
@@ -1260,17 +1325,14 @@ body {
 }
 
 .progress-count {
-  position: absolute;
-  z-index: 2;
-  top: 100%;
-  left: calc(100% + 0.75rem);
+  position: static;
   margin: 0;
   color: #8b2d1a;
   font-size: 1.25rem;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
-  transform: translateY(-100%);
+  text-align: center;
 }
 
 .questionnaire-eyebrow,
@@ -1325,6 +1387,10 @@ body {
 
 .question-options-four {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.question-options-five {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .question-options .choice-option {
@@ -1404,13 +1470,14 @@ body {
     overflow-y: auto;
   }
 
+  .questionnaire-panel,
   .questionnaire-progress {
-    padding-bottom: 2rem;
+    grid-column: auto;
+    grid-row: auto;
   }
 
-  .progress-track {
-    height: 10rem;
-    margin: 1.5rem auto 0;
+  .questionnaire-progress {
+    padding-bottom: 2rem;
   }
 
   .question-options-three,
@@ -2317,6 +2384,49 @@ body {
   grid-column: 1 / -1;
 }
 
+.profile-password-grid {
+  padding-top: 1.25rem;
+}
+
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input {
+  padding-right: 2.9rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8b2d1a;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.password-toggle::before {
+  content: "";
+  display: block;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--eye-icon) center / contain no-repeat;
+  mask: var(--eye-icon) center / contain no-repeat;
+  --eye-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+}
+
+.password-toggle[aria-pressed="true"]::before {
+  --eye-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24'/%3E%3Cpath d='M1 1l22 22'/%3E%3C/svg%3E");
+}
+
 .profile-form-grid input {
   width: 100%;
   box-sizing: border-box;
@@ -2921,3 +3031,23 @@ body {
   background: #f9e7d1;
 }
 
+.compatibility-total {
+  margin: 0;
+  padding: 0 1rem 0.75rem;
+  background: #f7dede;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.compatibility-percent {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  margin: 0;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: #d99a85;
+  color: #3b1809;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
