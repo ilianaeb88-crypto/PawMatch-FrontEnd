@@ -557,6 +557,67 @@ body {
   text-decoration: underline;
 }
 
+.reset-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40, 15, 5, 0.6);
+}
+
+.reset-overlay[hidden] {
+  display: none;
+}
+
+.reset-modal {
+  position: relative;
+  box-sizing: border-box;
+  width: min(80vmin, 90vw);
+  aspect-ratio: 1;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2.5rem;
+  background: #fff8ee;
+  border: 2px solid #b15b1c;
+  border-radius: 1.25rem;
+  color: #4a1d0f;
+}
+
+.reset-modal h2 {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.reset-modal label {
+  font-weight: 700;
+}
+
+.reset-modal input {
+  padding: 0.75rem;
+  border: 2px solid #b15b1c;
+  border-radius: 0.6rem;
+  font: inherit;
+}
+
+.reset-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  border: 0;
+  background: none;
+  color: #8b2d1a;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .account-form button {
   margin-top: 1rem;
   padding: 0.85rem 1rem;
@@ -2182,6 +2243,24 @@ body {
   gap: 0.45rem;
   padding: 2rem 1rem;
   background: #d7b08e;
+}
+
+.notification-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  box-sizing: border-box;
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: #c0392b;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .profile-settings-nav {

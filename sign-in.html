@@ -31,7 +31,29 @@
       </main>
     </div>
 
+    <div class="reset-overlay" id="reset-overlay" hidden>
+      <div class="reset-modal" role="dialog" aria-modal="true" aria-labelledby="reset-heading">
+        <button class="reset-close" id="reset-close" type="button" aria-label="Close">&times;</button>
+        <h2 id="reset-heading">Please Enter Your Email and if We Have it in Our System Then We Will Email You With a Code to Reset Your Password</h2>
+        <label for="reset-email">Email</label>
+        <input id="reset-email" type="email" autocomplete="email" />
+        <label for="reset-code">Code</label>
+        <input id="reset-code" type="text" inputmode="numeric" autocomplete="one-time-code" />
+      </div>
+    </div>
+
     <script>
+      const resetOverlay = document.querySelector("#reset-overlay");
+      const closeReset = () => { resetOverlay.hidden = true; };
+      document.querySelector(".forgot-password-link").addEventListener("click", (event) => {
+        event.preventDefault();
+        resetOverlay.hidden = false;
+        document.querySelector("#reset-email").focus();
+      });
+      document.querySelector("#reset-close").addEventListener("click", closeReset);
+      resetOverlay.addEventListener("click", (event) => { if (event.target === resetOverlay) closeReset(); });
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeReset(); });
+
       const signInForm = document.querySelector("#sign-in-form");
       const signInMessage = document.querySelector("#sign-in-message");
 

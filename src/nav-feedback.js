@@ -71,6 +71,25 @@ document.querySelectorAll('.profile-settings-sidebar a[href="liked-pets.html"]')
   link.dataset.navGuardReady = "true";
 });
 
+const notificationPetIds = ["cleo", "bear", "luna"];
+const seenNotificationsKey = "pawmatchSeenNotifications";
+
+if (window.location.pathname.endsWith("notifications.html")) {
+  localStorage.setItem(seenNotificationsKey, JSON.stringify(notificationPetIds));
+}
+
+const seenNotifications = parseStoredValue(seenNotificationsKey, []);
+const unseenNotificationCount = notificationPetIds.filter((id) => !seenNotifications.includes(id)).length;
+if (unseenNotificationCount > 0) {
+  document.querySelectorAll('.profile-settings-sidebar a[href="notifications.html"]').forEach((link) => {
+    const badge = document.createElement("span");
+    badge.className = "notification-badge";
+    badge.textContent = unseenNotificationCount;
+    badge.setAttribute("aria-label", `${unseenNotificationCount} new pets`);
+    link.append(badge);
+  });
+}
+
 const logoutButton = document.querySelector("#logout-button");
 if (logoutButton) {
   const logoutControl = document.createElement("div");
