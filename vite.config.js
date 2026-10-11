@@ -14,7 +14,6 @@ export default defineConfig({
         catBreed: 'cat-breed.html',
         catActivityLevel: 'cat-activity-level.html',
         dogBreed: 'dog-breed.html',
-        dogHairLength: 'dog-hair-length.html',
         dogActivityLevel: 'dog-activity-level.html',
         dogHypoallergenic: 'dog-hypoallergenic.html',
         dogType: 'dog-type.html',

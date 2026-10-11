@@ -3147,3 +3147,138 @@ body {
   font-size: 1.6rem;
   font-weight: 700;
 }
+.topbar .nav-item,
+.page .topbar .nav-item,
+.choice-topbar .nav-item {
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.page .topbar .nav-links .nav-item {
+  background: #e8c8a2;
+}
+
+.page .topbar .nav-links .nav-item:hover {
+  border-radius: 0.35rem;
+  background: #d7b08e;
+  color: #3b1809;
+  box-shadow: none;
+  transform: translateY(-3px);
+}
+
+.page .topbar .nav-links .nav-item {
+  background: var(--page-bg);
+}
+
+.page .topbar .nav-links .nav-item:hover {
+  background: #c69e78;
+}
+
+.profile-avatar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid #b15b1c;
+  border-radius: 50%;
+  background: #e8c8a2;
+  color: #8b2d1a;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.profile-avatar-button:hover {
+  background: #d7b08e;
+  transform: translateY(-3px);
+}
+
+.profile-avatar-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-button svg {
+  width: 80%;
+  height: 80%;
+  fill: currentColor;
+  margin-top: 0.35rem;
+}
+
+.profile-avatar-button {
+  width: 2.2rem;
+  height: 2.2rem;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+  background: #b88a63;
+}
+
+.profile-avatar-button:hover {
+  background: #a07350;
+}
+
+.page .topbar .profile-avatar-button {
+  position: relative;
+  top: -2px;
+}
+
+.page .topbar .nav-links {
+  padding-right: 12px;
+}
+
+.page .topbar .nav-links {
+  position: relative;
+  top: 0.05in;
+}
+
+.profile-menu {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.profile-menu-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 50;
+  display: none;
+  min-width: 11rem;
+  padding-top: 0.5rem;
+}
+
+.profile-menu:hover .profile-menu-panel,
+.profile-menu:focus-within .profile-menu-panel {
+  display: grid;
+}
+
+.profile-menu-panel > * {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 2px solid #b15b1c;
+  background: #e8c8a2;
+  color: #3b1809;
+  font: 700 1rem Arial, sans-serif;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.profile-menu-panel > :first-child {
+  border-radius: 0.35rem 0.35rem 0 0;
+}
+
+.profile-menu-panel > :last-child {
+  border-top: 0;
+  border-radius: 0 0 0.35rem 0.35rem;
+}
+
+.profile-menu-panel > :hover {
+  background: #d7b08e;
+}

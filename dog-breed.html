@@ -189,6 +189,15 @@
             </div>
           </fieldset>
 
+          <fieldset class="question-group">
+            <legend>Would You Prefer a Long or Short Haired Dog?</legend>
+            <div class="question-options question-options-four">
+              <button class="choice-option choice-option-primary" type="button" data-hair="long-hair">Long-Hair</button>
+              <button class="choice-option choice-option-secondary" type="button" data-hair="short-hair">Short-Hair</button>
+              <button class="choice-option choice-option-primary" type="button" data-hair="no-preference">No Preference</button>
+            </div>
+          </fieldset>
+
           <div class="dog-breed-actions">
             <a class="back-button" href="adoption-choice.html">Back</a>
             <button class="questionnaire-next" id="dog-breed-next" type="button" disabled>Next</button>
@@ -205,6 +214,7 @@
       const savedBreed = localStorage.getItem("selectedDogBreed");
       const weightButtons = document.querySelectorAll("[data-weight]");
       const dogTypeButtons = document.querySelectorAll('[data-group="dog-type"]');
+      const hairButtons = document.querySelectorAll("[data-hair]");
       const nextButton = document.querySelector("#dog-breed-next");
       const progressCount = document.querySelector("#progress-count");
       const progressBar = document.querySelector(".progress-track");
@@ -218,14 +228,26 @@
       ];
 
       function refreshDogBreedProgress() {
-        const answeredCount = ["selectedWeight", "selectedDogBreed", "selectedDogType"]
+        const answeredCount = ["selectedWeight", "selectedDogBreed", "selectedDogType", "selectedDogHairLength"]
           .filter((key) => localStorage.getItem(key)).length;
-        const percentage = Math.round((answeredCount / 3) * 100);
+        const percentage = Math.round((answeredCount / 4) * 100);
         progressCount.textContent = `${percentage}%`;
         progressBar.setAttribute("aria-valuenow", percentage);
         progressFill.style.height = `${percentage}%`;
-        nextButton.disabled = answeredCount < 3;
+        nextButton.disabled = answeredCount < 4;
       }
+
+      hairButtons.forEach((button) => {
+        if (button.dataset.hair === localStorage.getItem("selectedDogHairLength")) {
+          button.classList.add("is-selected");
+        }
+        button.addEventListener("click", () => {
+          hairButtons.forEach((option) => option.classList.remove("is-selected"));
+          button.classList.add("is-selected");
+          localStorage.setItem("selectedDogHairLength", button.dataset.hair);
+          refreshDogBreedProgress();
+        });
+      });
 
       weightButtons.forEach((button) => {
         if (button.dataset.weight === localStorage.getItem("selectedWeight")) {
@@ -287,14 +309,9 @@
         if (!breedDropdown.contains(event.target)) breedMenu.hidden = true;
       });
 
-      nextButton.disabled = !localStorage.getItem("selectedWeight")
-        || !localStorage.getItem("selectedDogBreed")
-        || !localStorage.getItem("selectedDogType");
       nextButton.addEventListener("click", () => {
         if (nextButton.disabled) return;
-        window.location.href = breedSelect.value === "No Preference"
-          ? "dog-hair-length.html"
-          : "dog-activity-level.html";
+        window.location.href = "dog-activity-level.html";
       });
       refreshDogBreedProgress();
     </script>

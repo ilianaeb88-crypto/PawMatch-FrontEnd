@@ -42,7 +42,9 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
+      import { restoreAnswersForAccount } from "./src/questionnaire-answers.js";
+
       const resetOverlay = document.querySelector("#reset-overlay");
       const closeReset = () => { resetOverlay.hidden = true; };
       document.querySelector(".forgot-password-link").addEventListener("click", (event) => {
@@ -69,6 +71,7 @@
         }
 
         event.preventDefault();
+        restoreAnswersForAccount(email);
         sessionStorage.setItem("pawmatchJustLoggedIn", "true");
         window.location.href = "home.html";
       });

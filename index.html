@@ -35,7 +35,9 @@
     </dialog>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script>
+    <script type="module">
+      import { restoreAnswersForAccount } from "./src/questionnaire-answers.js";
+
       const logoutSuccessDialog = document.querySelector("#logout-success-dialog");
       if (sessionStorage.getItem("pawmatchLogoutNotice") === "true") {
         sessionStorage.removeItem("pawmatchLogoutNotice");
@@ -67,6 +69,7 @@
           if (!apiResponse.ok) throw new Error(result.error || "Google sign-in failed.");
           localStorage.setItem("pawmatchToken", result.token);
           localStorage.setItem("pawmatchAccount", JSON.stringify(result.user));
+          restoreAnswersForAccount(result.user?.email);
           sessionStorage.setItem("pawmatchJustLoggedIn", "true");
           window.location.href = "home.html";
         } catch (error) {

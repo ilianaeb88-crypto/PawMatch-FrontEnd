@@ -36,7 +36,9 @@
       </main>
     </div>
 
-    <script>
+    <script type="module">
+      import { clearLiveAnswers } from "./src/questionnaire-answers.js";
+
       const createAccountForm = document.querySelector("#create-account-form");
       const createAccountMessage = document.querySelector("#create-account-message");
 
@@ -57,6 +59,7 @@
           password
         };
 
+        clearLiveAnswers();
         localStorage.setItem("pawmatchAccount", JSON.stringify(account));
       });
     </script>

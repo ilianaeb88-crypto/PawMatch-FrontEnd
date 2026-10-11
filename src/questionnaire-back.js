@@ -1,3 +1,4 @@
+import "./profile-button.js";
 document.querySelectorAll(".back-button:not(.done-button)").forEach((backButton) => {
   backButton.addEventListener("click", (event) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

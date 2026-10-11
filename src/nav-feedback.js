@@ -1,4 +1,6 @@
+import "./profile-button.js";
 import { isQuestionnaireComplete } from "./questionnaire-state.js";
+import { clearLiveAnswers, saveAnswersForAccount } from "./questionnaire-answers.js";
 
 let activeNotice;
 let activeNoticeTimeout;
@@ -115,6 +117,9 @@ if (logoutButton) {
   confirmation.querySelector('[data-action="cancel"]').addEventListener("click", () => confirmation.remove());
   confirmation.querySelector('[data-action="confirm"]').addEventListener("click", () => {
     localStorage.removeItem("pawmatchToken");
+    const loggedOutAccount = JSON.parse(localStorage.getItem("pawmatchAccount") || "null");
+    saveAnswersForAccount(loggedOutAccount?.email);
+    clearLiveAnswers();
     sessionStorage.removeItem("pawmatchJustLoggedIn");
     sessionStorage.setItem("pawmatchLogoutNotice", "true");
     window.location.href = "index.html";
