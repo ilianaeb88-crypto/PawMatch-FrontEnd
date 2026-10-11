@@ -16,10 +16,7 @@
           <form class="welcome-signup-form" action="create-account.html">
             <button class="welcome-signup-button" id="welcome-login-button" type="button">Log in</button>
             <button class="welcome-signup-button" type="submit">Sign Up</button>
-            <div class="welcome-or-divider" aria-hidden="true"><span>OR</span></div>
-            <button class="welcome-google-button" id="google-sign-in-button" type="button"><span class="google-icon" aria-hidden="true">G</span>Continue with Google</button>
           </form>
-          <p class="welcome-form-message" id="welcome-google-message" role="alert" aria-live="polite"></p>
         </div>
       </div>
       <aside class="account-choice-visual" aria-label="Pawmatch pet adoption">
@@ -34,10 +31,7 @@
       <button class="welcome-signup-button" id="dismiss-logout-notice" type="button">Continue</button>
     </dialog>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script type="module">
-      import { restoreAnswersForAccount } from "./src/questionnaire-answers.js";
-
+    <script>
       const logoutSuccessDialog = document.querySelector("#logout-success-dialog");
       if (sessionStorage.getItem("pawmatchLogoutNotice") === "true") {
         sessionStorage.removeItem("pawmatchLogoutNotice");
@@ -45,67 +39,8 @@
       }
       document.querySelector("#dismiss-logout-notice").addEventListener("click", () => logoutSuccessDialog.close());
 
-      const googleButton = document.querySelector("#google-sign-in-button");
-      const googleMessage = document.querySelector("#welcome-google-message");
       document.querySelector("#welcome-login-button").addEventListener("click", () => {
         window.location.href = "sign-in.html";
-      });
-      const googleClientId = "%VITE_GOOGLE_CLIENT_ID%";
-      const configuredApiBaseUrl = "%VITE_API_BASE_URL%";
-      const apiBaseUrl = configuredApiBaseUrl.startsWith("%VITE_") ? "http://localhost:4000/api" : configuredApiBaseUrl;
-
-      function showGoogleMessage(message) {
-        googleMessage.textContent = message;
-      }
-
-      async function finishGoogleSignIn(response) {
-        try {
-          const apiResponse = await fetch(`${apiBaseUrl}/auth/google`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ credential: response.credential }),
-          });
-          const result = await apiResponse.json();
-          if (!apiResponse.ok) throw new Error(result.error || "Google sign-in failed.");
-          localStorage.setItem("pawmatchToken", result.token);
-          localStorage.setItem("pawmatchAccount", JSON.stringify(result.user));
-          restoreAnswersForAccount(result.user?.email);
-          sessionStorage.setItem("pawmatchJustLoggedIn", "true");
-          window.location.href = "home.html";
-        } catch (error) {
-          showGoogleMessage(error.message);
-          googleButton.disabled = false;
-        }
-      }
-
-      function initializeGoogleSignIn() {
-        if (googleClientId.startsWith("%VITE_")) {
-          showGoogleMessage("Google sign-in is not configured for this deployment.");
-          googleButton.disabled = false;
-          return;
-        }
-        if (!window.google?.accounts?.id) {
-          showGoogleMessage("Google sign-in is still loading. Please try again.");
-          googleButton.disabled = false;
-          return;
-        }
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: finishGoogleSignIn,
-          context: "signin",
-          auto_select: false,
-        });
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
-            googleButton.disabled = false;
-            showGoogleMessage("Choose a Google account to continue, or try again.");
-          }
-        });
-      }
-
-      googleButton.addEventListener("click", () => {
-        googleButton.disabled = true;
-        initializeGoogleSignIn();
       });
 
       localStorage.removeItem("selectedPath");
