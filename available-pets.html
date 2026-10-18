@@ -25,40 +25,75 @@
           </label>
           <select data-filter="path" aria-label="Adoption or foster"><option value="">Adoption or Foster</option><option>Adoption</option><option>Foster</option></select>
           <select data-filter="animal" aria-label="Cat or dog"><option value="">Cat or Dog</option><option>Cat</option><option>Dog</option></select>
-          <select data-filter="breed" aria-label="Breed"><option value="">Breed</option><option>Scottish-Fold</option><option>British Shorthair</option><option>Pug</option><option>Labrador Retriever</option></select>
-          <select data-filter="center" aria-label="Adoption center"><option value="">Adoption Center</option><option>SPCA</option><option>Paws & Paths Rescue</option><option>Second Chance Animal Care</option></select>
+          <!-- Breed and Adoption Center options are filled in from the pets that actually exist -->
+          <select data-filter="breed" aria-label="Breed"><option value="">Breed</option></select>
+          <select data-filter="center" aria-label="Adoption center"><option value="">Adoption Center</option></select>
           <select data-filter="gender" aria-label="Gender"><option value="">Gender</option><option>Female</option><option>Male</option></select>
           <button id="liked-filter" class="liked-filter" type="button" aria-pressed="false">Liked</button>
         </section>
 
-        <section class="available-pet-grid" id="available-pet-grid" aria-label="Available pets">
-          <article class="available-pet-card" data-profile="luna" data-path="Adoption" data-name="Kylar" data-animal="Cat" data-breed="British Shorthair" data-gender="Male" data-liked="false">
-            <button class="pet-like" type="button" aria-label="Like Kylar" aria-pressed="false">♡</button>
-            <img src="src/assets/image copy 3.png" alt="Kylar, a British Shorthair cat" />
-            <div class="available-pet-meta"><strong>Kylar</strong><span>Male</span><span>Years Old</span><span>British Shorthair</span></div>
-          </article>
-          <article class="available-pet-card" data-profile="sayana" data-path="Adoption" data-name="Sayana" data-animal="Dog" data-breed="Pug" data-gender="Female" data-liked="false">
-            <button class="pet-like" type="button" aria-label="Like Sayana" aria-pressed="false">♡</button>
-            <img src="src/assets/image copy 5.png" alt="Sayana, a pug" />
-            <div class="available-pet-meta"><strong>Sayana</strong><span>Female</span><span>2 Years Old</span><span>Pug</span></div>
-          </article>
-          <article class="available-pet-card" data-profile="bear" data-path="Foster" data-name="Jarl" data-animal="Dog" data-breed="Labrador Retriever" data-gender="Male" data-liked="false">
-            <button class="pet-like" type="button" aria-label="Like Jarl" aria-pressed="false">♡</button>
-            <img src="src/assets/image copy 4.png" alt="Jarl, a Labrador Retriever" />
-            <div class="available-pet-meta"><strong>Jarl</strong><span>Male</span><span>1 Year Old</span><span>Labrador Retriever</span></div>
-          </article>
-        </section>
+        <p id="pet-status" role="status" aria-live="polite">Loading pets…</p>
+        <section class="available-pet-grid" id="available-pet-grid" aria-label="Available pets"></section>
         <a class="profile-return available-return" id="available-pets-return" href="home.html">Return</a>
       </main>
     </div>
 
-    <script>
-      const cards = [...document.querySelectorAll(".available-pet-card")];
-      const savedLikedPets = JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
+    <script type="module">
+      import { getPets } from "./src/api.js";
+      import imageCopy2 from "./src/assets/image copy 2.png";
+      import imageCopy3 from "./src/assets/image copy 3.png";
+      import imageCopy4 from "./src/assets/image copy 4.png";
+      import imageCopy5 from "./src/assets/image copy 5.png";
+
+      // The original demo pets keep their bundled photos. Every other pet uses
+      // the image URL saved with it (for form pets, a Google Drive link).
+      const demoImages = { milo: imageCopy4, luna: imageCopy3, bear: imageCopy5, cleo: imageCopy2 };
+      const fallbackImage = (pet) => `${import.meta.env.BASE_URL}${pet.animal === "Cat" ? "cat.png" : "dog-transparent.png"}`;
+      const imageFor = (pet) => demoImages[pet.id] || pet.image || fallbackImage(pet);
+
+      // Pet details come from a public form, so always escape before putting them in HTML.
+      const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const ageText = (age) => (Number(age) > 0 ? `${age} Year${Number(age) === 1 ? "" : "s"} Old` : "Age unknown");
+
+      const grid = document.querySelector("#available-pet-grid");
+      const status = document.querySelector("#pet-status");
       const search = document.querySelector("#pet-search");
       const likedFilter = document.querySelector("#liked-filter");
       const filters = [...document.querySelectorAll("[data-filter]")];
       const searchField = search.closest(".pet-search-field");
+      let cards = [];
+
+      function readLikedPets() {
+        try {
+          return JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      function cardHtml(pet) {
+        return `
+          <article class="available-pet-card" data-profile="${esc(pet.id)}" data-path="${esc(pet.path)}" data-name="${esc(pet.name)}" data-animal="${esc(pet.animal)}" data-breed="${esc(pet.breed)}" data-gender="${esc(pet.gender)}" data-center="${esc(pet.shelter?.name)}" data-liked="false">
+            <button class="pet-like" type="button" aria-label="Like ${esc(pet.name)}" aria-pressed="false">♡</button>
+            <img src="${esc(imageFor(pet))}" alt="${esc(pet.name)}, ${esc(pet.breed)}" data-fallback="${esc(fallbackImage(pet))}" loading="lazy" referrerpolicy="no-referrer" />
+            <div class="available-pet-meta"><strong>${esc(pet.name)}</strong><span>${esc(pet.gender)}</span><span>${esc(ageText(pet.age))}</span><span>${esc(pet.breed)}</span></div>
+          </article>`;
+      }
+
+      function setLiked(card, liked) {
+        const button = card.querySelector(".pet-like");
+        button.setAttribute("aria-pressed", String(liked));
+        button.textContent = liked ? "♥" : "♡";
+        card.dataset.liked = String(liked);
+      }
+
+      function fillOptions(select, values) {
+        const placeholder = select.options[0];
+        select.replaceChildren(placeholder);
+        [...new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b))
+          .forEach((value) => select.append(new Option(value, value)));
+      }
 
       function refreshActiveFilterStyles() {
         filters.forEach((filter) => {
@@ -87,33 +122,32 @@
         likedFilter.setAttribute("aria-pressed", String(isLiked));
         applyFilters();
       });
-      document.querySelectorAll(".pet-like").forEach((button) => {
-        const card = button.closest(".available-pet-card");
-        const profileId = card.dataset.profile;
-        const isSaved = savedLikedPets.includes(profileId);
-        button.setAttribute("aria-pressed", String(isSaved));
-        button.textContent = isSaved ? "♥" : "♡";
-        card.dataset.liked = String(isSaved);
-        button.addEventListener("click", () => {
-          const card = button.closest(".available-pet-card");
-          const liked = button.getAttribute("aria-pressed") !== "true";
-          button.setAttribute("aria-pressed", String(liked));
-          button.textContent = liked ? "♥" : "♡";
-          card.dataset.liked = String(liked);
-          const likedPets = JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
+
+      // One listener on the grid handles every card, including ones added later.
+      grid.addEventListener("click", (event) => {
+        const card = event.target.closest(".available-pet-card");
+        if (!card) return;
+        if (event.target.closest(".pet-like")) {
+          const liked = card.dataset.liked !== "true";
+          setLiked(card, liked);
+          const likedPets = readLikedPets();
           const index = likedPets.indexOf(card.dataset.profile);
           if (liked && index === -1) likedPets.push(card.dataset.profile);
           if (!liked && index !== -1) likedPets.splice(index, 1);
           localStorage.setItem("pawmatchLikedPets", JSON.stringify(likedPets));
           applyFilters();
-        });
+          return;
+        }
+        window.location.href = `pet-profile.html?pet=${encodeURIComponent(card.dataset.profile)}&from=available`;
       });
-      cards.forEach((card) => {
-        card.addEventListener("click", (event) => {
-          if (event.target.closest(".pet-like")) return;
-          window.location.href = `pet-profile.html?pet=${card.dataset.profile}&from=available`;
-        });
-      });
+
+      // If a photo can't load (private Drive file, old path), show a generic one instead.
+      grid.addEventListener("error", (event) => {
+        const image = event.target;
+        if (!(image instanceof HTMLImageElement)) return;
+        const fallback = image.dataset.fallback;
+        if (fallback && image.getAttribute("src") !== fallback) image.src = fallback;
+      }, true);
 
       document.querySelector("#available-pets-return").addEventListener("click", (event) => {
         try {
@@ -126,7 +160,34 @@
         }
       });
 
-      applyFilters();
+      async function init() {
+        // The free hosting plan sleeps when idle, so the first load can be slow.
+        const slowNotice = setTimeout(() => {
+          status.textContent = "Still loading… the server may be waking up, which can take up to a minute.";
+        }, 6000);
+        try {
+          const pets = await getPets();
+          clearTimeout(slowNotice);
+          if (!pets.length) {
+            status.textContent = "No pets are available right now. Please check back soon.";
+            return;
+          }
+          fillOptions(document.querySelector('[data-filter="breed"]'), pets.map((pet) => pet.breed));
+          fillOptions(document.querySelector('[data-filter="center"]'), pets.map((pet) => pet.shelter?.name));
+          grid.innerHTML = pets.map(cardHtml).join("");
+          cards = [...grid.querySelectorAll(".available-pet-card")];
+          const likedPets = readLikedPets();
+          cards.forEach((card) => setLiked(card, likedPets.includes(card.dataset.profile)));
+          status.hidden = true;
+          applyFilters();
+        } catch (error) {
+          clearTimeout(slowNotice);
+          console.error(error);
+          status.textContent = "We couldn't load the pets. Please refresh the page to try again.";
+        }
+      }
+
+      init();
     </script>
     <script type="module" src="./src/nav-feedback.js"></script>
   </body>

@@ -53,13 +53,16 @@
     </div>
 
     <script type="module">
-      import { getCompatibility } from "./src/compatibility.js";
+      import { getPet } from "./src/api.js";
+      import { compatibilityProfiles, getCompatibility } from "./src/compatibility.js";
       import { isQuestionnaireComplete } from "./src/questionnaire-state.js";
       import imageCopy2 from "./src/assets/image copy 2.png";
       import imageCopy3 from "./src/assets/image copy 3.png";
       import imageCopy4 from "./src/assets/image copy 4.png";
       import imageCopy5 from "./src/assets/image copy 5.png";
 
+      // The original demo pets keep their hand-written profiles and bundled photos.
+      // Any other pet id (for example one added through the Google Form) is loaded from the API.
       const profiles = {
         milo: {
           name: "Milo", image: imageCopy4, path: "Adoption", breed: "Border Collie Mix", age: "3 Years Old", gender: "Male", size: "Medium", fixed: "Yes", trained: "Yes", description: "Milo is an energetic, loyal companion who loves an active home.", shelter: "Paws & Paths Rescue", phone: "903-565-8899", email: "hello@pawsandpaths.org", location: "9854 County Road", hours: "10AM - 5PM"
@@ -78,32 +81,88 @@
         }
       };
 
-      const profile = profiles[new URLSearchParams(window.location.search).get("pet")] || profiles.milo;
-      const profileParams = new URLSearchParams(window.location.search);
-      const profileSource = profileParams.get("from");
-      document.title = `Pawmatch - ${profile.name}`;
-      const returnPages = { available: "available-pets.html", notifications: "notifications.html", liked: "liked-pets.html", matches: "match-results.html" };
-      if (returnPages[profileSource]) {
-        document.querySelector("#profile-return").href = returnPages[profileSource];
+      const yesNo = (value) => (value === true ? "Yes" : value === false ? "No" : "Unknown");
+      const orNA = (value) => (value && String(value).trim()) || "N/A";
+
+      // Turns a pet from the API into the same shape as the hand-written profiles above.
+      function profileFromApi(pet) {
+        const fallback = `${import.meta.env.BASE_URL}${pet.animal === "Cat" ? "cat.png" : "dog-transparent.png"}`;
+        return {
+          name: pet.name, image: pet.image || fallback, fallbackImage: fallback, path: pet.path, breed: pet.breed,
+          age: Number(pet.age) > 0 ? `${pet.age} Year${Number(pet.age) === 1 ? "" : "s"} Old` : "Unknown",
+          gender: pet.gender, size: orNA(pet.size === "Unknown" ? "" : pet.size), fixed: yesNo(pet.fixed), trained: yesNo(pet.trained),
+          description: pet.description || "", shelter: orNA(pet.shelter?.name), phone: orNA(pet.shelter?.phone),
+          email: orNA(pet.shelter?.email), location: orNA(pet.shelter?.location), hours: orNA(pet.shelter?.hours)
+        };
       }
-      const compatibilityLink = document.querySelector("#compatibility-link");
-      const matchBadge = document.querySelector("#pet-match");
-      if (isQuestionnaireComplete()) {
-        compatibilityLink.href = `compatibility.html?pet=${profileParams.get("pet") || "milo"}${profileSource ? `&from=${profileSource}` : ""}`;
-        compatibilityLink.hidden = false;
-        matchBadge.textContent = `${getCompatibility(profileParams.get("pet")).percent}% Match`;
-        matchBadge.hidden = false;
-      } else {
-        compatibilityLink.remove();
-        matchBadge.remove();
+
+      async function loadProfile(petId) {
+        if (!petId) return profiles.milo; // same as before when no pet is given
+        if (profiles[petId]) return profiles[petId];
+        try {
+          return profileFromApi(await getPet(petId));
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
       }
-      document.querySelector("#pet-name").textContent = profile.name;
-      document.querySelector("#pet-image").src = profile.image;
-      document.querySelector("#pet-image").alt = `${profile.name}, ${profile.breed}`;
-      document.querySelector("#pet-path").textContent = profile.path;
-      ["breed", "age", "gender", "size", "fixed", "trained", "description", "shelter", "phone", "email", "location", "hours"].forEach((key) => {
-        document.querySelector(`#pet-${key}`).textContent = profile[key];
-      });
+
+      async function main() {
+        const profileParams = new URLSearchParams(window.location.search);
+        const petId = profileParams.get("pet");
+        const profileSource = profileParams.get("from");
+        const profile = await loadProfile(petId);
+
+        const returnPages = { available: "available-pets.html", notifications: "notifications.html", liked: "liked-pets.html", matches: "match-results.html" };
+        if (returnPages[profileSource]) {
+          document.querySelector("#profile-return").href = returnPages[profileSource];
+        }
+        const compatibilityLink = document.querySelector("#compatibility-link");
+        const matchBadge = document.querySelector("#pet-match");
+
+        if (!profile) {
+          document.title = "Pawmatch - Pet not found";
+          document.querySelector("#pet-name").textContent = "Pet not found";
+          document.querySelector("#pet-description").textContent = "We couldn't find or load this pet. It may have been adopted, or the connection failed. Please go back and try again.";
+          document.querySelector("#pet-image").remove();
+          compatibilityLink.remove();
+          matchBadge.remove();
+          return;
+        }
+
+        document.title = `Pawmatch - ${profile.name}`;
+
+        // Compatibility is only calculated for pets that have hand-written trait data.
+        // For any other pet it would silently use Milo's data, so hide it instead.
+        const compareId = petId || "milo";
+        if (isQuestionnaireComplete() && compatibilityProfiles[compareId]) {
+          compatibilityLink.href = `compatibility.html?pet=${compareId}${profileSource ? `&from=${profileSource}` : ""}`;
+          compatibilityLink.hidden = false;
+          matchBadge.textContent = `${getCompatibility(compareId).percent}% Match`;
+          matchBadge.hidden = false;
+        } else {
+          compatibilityLink.remove();
+          matchBadge.remove();
+        }
+
+        const image = document.querySelector("#pet-image");
+        image.referrerPolicy = "no-referrer";
+        if (profile.fallbackImage) {
+          image.addEventListener("error", () => {
+            if (image.getAttribute("src") !== profile.fallbackImage) image.src = profile.fallbackImage;
+          });
+        }
+        image.src = profile.image;
+        image.alt = `${profile.name}, ${profile.breed}`;
+
+        document.querySelector("#pet-name").textContent = profile.name;
+        document.querySelector("#pet-path").textContent = profile.path;
+        ["breed", "age", "gender", "size", "fixed", "trained", "description", "shelter", "phone", "email", "location", "hours"].forEach((key) => {
+          document.querySelector(`#pet-${key}`).textContent = profile[key];
+        });
+      }
+
+      main();
     </script>
     <script type="module" src="./src/nav-feedback.js"></script>
   </body>
