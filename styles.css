@@ -3282,3 +3282,8 @@ body {
 .profile-menu-panel > :hover {
   background: #d7b08e;
 }
+
+.breed-label .breed-note {
+  font-size: 0.7em;
+  font-weight: normal;
+}

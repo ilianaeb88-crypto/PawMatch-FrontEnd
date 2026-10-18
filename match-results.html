@@ -47,7 +47,7 @@
               <p class="profile-type">German Shepherd</p>
               <dl class="profile-facts">
                 <div><dt>Gender</dt><dd>Male</dd></div>
-                <div><dt>Age</dt><dd>3 years</dd></div>
+                <div><dt>Age</dt><dd>Adult</dd></div>
               </dl>
             </div>
           </article>
@@ -62,7 +62,7 @@
               <p class="profile-type">Domestic Shorthair</p>
               <dl class="profile-facts">
                 <div><dt>Gender</dt><dd>Female</dd></div>
-                <div><dt>Age</dt><dd>2 years</dd></div>
+                <div><dt>Age</dt><dd>Young</dd></div>
               </dl>
             </div>
           </article>
@@ -77,7 +77,7 @@
               <p class="profile-type">Shepherd Mix</p>
               <dl class="profile-facts">
                 <div><dt>Gender</dt><dd>Male</dd></div>
-                <div><dt>Age</dt><dd>5 years</dd></div>
+                <div><dt>Age</dt><dd>Adult</dd></div>
               </dl>
             </div>
           </article>
@@ -92,7 +92,7 @@
               <p class="profile-type">Calico</p>
               <dl class="profile-facts">
                 <div><dt>Gender</dt><dd>Female</dd></div>
-                <div><dt>Age</dt><dd>4 years</dd></div>
+                <div><dt>Age</dt><dd>Adult</dd></div>
               </dl>
             </div>
           </article>
@@ -142,7 +142,7 @@
         if (answerKey === "selectedWeight") {
           if (!pet.size) return true;
           const sizeByRange = {
-            "0-10": "small", "10-30": "small", "30-50": "medium", "50-70": "medium",
+            "0-10": "small", "10-30": "small", "30-70": "medium", "30-50": "medium", "50-70": "medium",
             "70-90": "large", "90-110": "large", "greater-than-110": "large",
           };
           return sizeByRange[preference] === pet.size;
