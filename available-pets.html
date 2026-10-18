@@ -3,191 +3,176 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pawmatch - Available Pets</title>
+    <title>Pawmatch - Pet Profile</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="choice-page available-pets-page">
+  <body class="choice-page pet-profile-page">
     <div class="choice-shell">
       <header class="topbar choice-topbar">
-        <a href="home.html" class="brand"><img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" /><span class="brand-name">Pawmatch</span></a>
+        <a href="home.html" class="brand">
+          <img class="brand-icon" src="./src/assets/image copy 17.png" alt="" aria-hidden="true" />
+          <span class="brand-name">Pawmatch</span>
+        </a>
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="profile.html" class="nav-item">Profile</a>
-          <a href="match-results.html" class="nav-item">Best Matches</a>
           <a href="adoption-choice.html" class="nav-item">Questionnaire</a>
+          <a href="match-results.html" class="nav-item">Best Matches</a>
+          <a href="available-pets.html" class="nav-item available-pets-top-button">Available Pets</a>
         </nav>
       </header>
 
-      <main class="available-pets-content">
-        <section class="pet-search-bar" aria-label="Search and filter available pets">
-          <label class="pet-search-field">
-            <span aria-hidden="true">⌕</span>
-            <input id="pet-search" type="search" placeholder="Search by name" />
-          </label>
-          <select data-filter="path" aria-label="Adoption or foster"><option value="">Adoption or Foster</option><option>Adoption</option><option>Foster</option></select>
-          <select data-filter="animal" aria-label="Cat or dog"><option value="">Cat or Dog</option><option>Cat</option><option>Dog</option></select>
-          <!-- Breed and Adoption Center options are filled in from the pets that actually exist -->
-          <select data-filter="breed" aria-label="Breed"><option value="">Breed</option></select>
-          <select data-filter="center" aria-label="Adoption center"><option value="">Adoption Center</option></select>
-          <select data-filter="gender" aria-label="Gender"><option value="">Gender</option><option>Female</option><option>Male</option></select>
-          <button id="liked-filter" class="liked-filter" type="button" aria-pressed="false">Liked</button>
-        </section>
+      <main class="pet-profile-layout" id="pet-profile">
+        <aside class="pet-profile-sidebar">
+          <div class="pet-profile-image-wrap">
+            <img id="pet-image" class="pet-profile-image" alt="" />
+            <span class="profile-match-score" id="pet-match" hidden></span>
+          </div>
+          <a class="compatibility-button" id="compatibility-link" href="compatibility.html" hidden>See Your Compatibility</a>
+          <div class="shelter-summary">
+            <p id="pet-description"></p>
+            <p><strong>Shelter:</strong> <span id="pet-shelter"></span></p>
+            <p><strong>Phone Number:</strong> <span id="pet-phone"></span></p>
+            <p><strong>Email:</strong> <span id="pet-email"></span></p>
+            <p><strong>Location:</strong> <span id="pet-location"></span></p>
+            <p><strong>Hours:</strong> <span id="pet-hours"></span></p>
+          </div>
+            <a class="profile-return" id="profile-return" href="match-results.html">Return</a>
+        </aside>
 
-        <p id="pet-status" role="status" aria-live="polite">Loading pets…</p>
-        <section class="available-pet-grid" id="available-pet-grid" aria-label="Available pets"></section>
-        <a class="profile-return available-return" id="available-pets-return" href="home.html">Return</a>
+        <section class="pet-profile-facts">
+          <h1 id="pet-name"></h1>
+          <div class="pet-fact"><strong>Breed</strong><span id="pet-breed"></span></div>
+          <div class="pet-fact"><strong>Age</strong><span id="pet-age"></span></div>
+          <div class="pet-fact"><strong>Gender</strong><span id="pet-gender"></span></div>
+          <div class="pet-fact"><strong>Size</strong><span id="pet-size"></span></div>
+          <div class="pet-fact"><strong>Spayed/Neutered</strong><span id="pet-fixed"></span></div>
+          <div class="pet-fact" id="pet-vaccinated-row" hidden><strong>Vaccinated</strong><span id="pet-vaccinated"></span></div>
+          <div class="pet-fact"><strong>House Trained</strong><span id="pet-trained"></span></div>
+          <div class="pet-fact"><strong>Available For</strong><span id="pet-path"></span></div>
+        </section>
       </main>
     </div>
 
     <script type="module">
-      import { getPets } from "./src/api.js";
+      import { getPet } from "./src/api.js";
+      import { compatibilityProfiles, getCompatibility } from "./src/compatibility.js";
+      import { isQuestionnaireComplete } from "./src/questionnaire-state.js";
       import imageCopy2 from "./src/assets/image copy 2.png";
       import imageCopy3 from "./src/assets/image copy 3.png";
       import imageCopy4 from "./src/assets/image copy 4.png";
       import imageCopy5 from "./src/assets/image copy 5.png";
+      import imageCopy22 from "./src/assets/image copy 22.png";
 
-      // The original demo pets keep their bundled photos. Every other pet uses
-      // the image URL saved with it (for form pets, a Google Drive link).
-      const demoImages = { milo: imageCopy4, luna: imageCopy3, bear: imageCopy5, cleo: imageCopy2 };
-      const fallbackImage = (pet) => `${import.meta.env.BASE_URL}${pet.animal === "Cat" ? "cat.png" : "dog-transparent.png"}`;
-      const imageFor = (pet) => demoImages[pet.id] || pet.image || fallbackImage(pet);
+      // The original demo pets keep their hand-written profiles and bundled photos.
+      // Any other pet id (for example one added through the Google Form) is loaded from the API.
+      const profiles = {
+        milo: {
+          name: "Milo", image: imageCopy4, path: "Adoption", breed: "Border Collie Mix", age: "Adult - 3 Years Old", gender: "Male", size: "Medium (30-70lb)", fixed: "Yes", trained: "Yes", description: "Milo is an energetic, loyal companion who loves an active home.", shelter: "Paws & Paths Rescue", phone: "903-565-8899", email: "hello@pawsandpaths.org", location: "9854 County Road", hours: "10AM - 5PM"
+        },
+        luna: {
+          name: "Luna", image: imageCopy3, path: "Adoption", breed: "Domestic Shorthair", age: "Young - 2 Years Old", gender: "Female", size: "Small - 8lb", fixed: "Yes", trained: "Yes", description: "Luna is a gentle, curious cat who enjoys sunny windows and quiet company.", shelter: "SPCA", phone: "903-565-8899", email: "spca@shelter.org", location: "9854 County Road", hours: "10AM - 5PM"
+        },
+        bear: {
+          name: "Bear", image: imageCopy5, path: "Foster", breed: "Corgi Mix", age: "Adult - 5 Years Old", gender: "Male", size: "Medium (30-70lb)", fixed: "Yes", trained: "Yes", description: "Bear is a friendly, steady dog ready to be part of a loving family.", shelter: "Second Chance Animal Care", phone: "903-565-8899", email: "adopt@secondchance.org", location: "9854 County Road", hours: "10AM - 5PM"
+        },
+        cleo: {
+          name: "Cleo", image: imageCopy2, path: "Adoption", breed: "Calico", age: "Adult - 4 Years Old", gender: "Female", size: "Small - 9lb", fixed: "Yes", trained: "Yes", description: "Cleo is a calm, affectionate cat who would thrive in a patient home.", shelter: "Whiskers Welcome", phone: "903-565-8899", email: "hello@whiskerswelcome.org", location: "9854 County Road", hours: "10AM - 5PM"
+        },
+        sayana: {
+          name: "Sayana", image: imageCopy5, path: "Adoption", breed: "Pug", age: "Young - 2 Years Old", gender: "Female", size: "Small (10-30lb)", fixed: "Yes", trained: "Yes", description: "Sayana is a playful, affectionate pug who loves attention and cozy naps.", shelter: "Paws & Paths Rescue", phone: "903-565-8899", email: "hello@pawsandpaths.org", location: "9854 County Road", hours: "10AM - 5PM"
+        },
+        genesis: {
+          name: "Genesis", image: imageCopy22, path: "Adoption", breed: "Labrador Retriever Mix", age: "Adult (3-7)", gender: "Female", size: "Medium (30-70lb)", fixed: "Yes", vaccinated: "Yes", imagePosition: "50% 40%", trained: "No", description: "Genesis is a friendly adult Labrador Retriever looking for a loving home.", shelter: "SPCA", phone: "903-565-8899", email: "spca@shelter.org", location: "9854 County Road", hours: "10AM - 5PM"
+        }
+      };
 
-      // Pet details come from a public form, so always escape before putting them in HTML.
-      const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-      const ageText = (age) => (Number(age) > 0 ? `${age} Year${Number(age) === 1 ? "" : "s"} Old` : "Age unknown");
+      const yesNo = (value) => (value === true ? "Yes" : value === false ? "No" : "Unknown");
+      const orNA = (value) => (value && String(value).trim()) || "N/A";
 
-      const grid = document.querySelector("#available-pet-grid");
-      const status = document.querySelector("#pet-status");
-      const search = document.querySelector("#pet-search");
-      const likedFilter = document.querySelector("#liked-filter");
-      const filters = [...document.querySelectorAll("[data-filter]")];
-      const searchField = search.closest(".pet-search-field");
-      let cards = [];
+      // Turns a pet from the API into the same shape as the hand-written profiles above.
+      function profileFromApi(pet) {
+        const fallback = `${import.meta.env.BASE_URL}${pet.animal === "Cat" ? "cat.png" : "dog-transparent.png"}`;
+        return {
+          name: pet.name, image: pet.image || fallback, fallbackImage: fallback, path: pet.path, breed: pet.breed,
+          age: Number(pet.age) > 0 ? `${pet.age} Year${Number(pet.age) === 1 ? "" : "s"} Old` : "Unknown",
+          gender: pet.gender, size: orNA(pet.size === "Unknown" ? "" : pet.size), fixed: yesNo(pet.fixed), trained: yesNo(pet.trained),
+          description: pet.description || "", shelter: orNA(pet.shelter?.name), phone: orNA(pet.shelter?.phone),
+          email: orNA(pet.shelter?.email), location: orNA(pet.shelter?.location), hours: orNA(pet.shelter?.hours)
+        };
+      }
 
-      function readLikedPets() {
+      async function loadProfile(petId) {
+        if (!petId) return profiles.milo; // same as before when no pet is given
+        if (profiles[petId]) return profiles[petId];
         try {
-          return JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
-        } catch {
-          return [];
+          return profileFromApi(await getPet(petId));
+        } catch (error) {
+          console.error(error);
+          return null;
         }
       }
 
-      function cardHtml(pet) {
-        return `
-          <article class="available-pet-card" data-profile="${esc(pet.id)}" data-path="${esc(pet.path)}" data-name="${esc(pet.name)}" data-animal="${esc(pet.animal)}" data-breed="${esc(pet.breed)}" data-gender="${esc(pet.gender)}" data-center="${esc(pet.shelter?.name)}" data-liked="false">
-            <button class="pet-like" type="button" aria-label="Like ${esc(pet.name)}" aria-pressed="false">♡</button>
-            <img src="${esc(imageFor(pet))}" alt="${esc(pet.name)}, ${esc(pet.breed)}" data-fallback="${esc(fallbackImage(pet))}" loading="lazy" referrerpolicy="no-referrer" />
-            <div class="available-pet-meta"><strong>${esc(pet.name)}</strong><span>${esc(pet.gender)}</span><span>${esc(ageText(pet.age))}</span><span>${esc(pet.breed)}</span></div>
-          </article>`;
-      }
+      async function main() {
+        const profileParams = new URLSearchParams(window.location.search);
+        const petId = profileParams.get("pet");
+        const profileSource = profileParams.get("from");
+        const profile = await loadProfile(petId);
 
-      function setLiked(card, liked) {
-        const button = card.querySelector(".pet-like");
-        button.setAttribute("aria-pressed", String(liked));
-        button.textContent = liked ? "♥" : "♡";
-        card.dataset.liked = String(liked);
-      }
+        const returnPages = { available: "available-pets.html", notifications: "notifications.html", liked: "liked-pets.html", matches: "match-results.html" };
+        if (returnPages[profileSource]) {
+          document.querySelector("#profile-return").href = returnPages[profileSource];
+        }
+        const compatibilityLink = document.querySelector("#compatibility-link");
+        const matchBadge = document.querySelector("#pet-match");
 
-      function fillOptions(select, values) {
-        const placeholder = select.options[0];
-        select.replaceChildren(placeholder);
-        [...new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean))]
-          .sort((a, b) => a.localeCompare(b))
-          .forEach((value) => select.append(new Option(value, value)));
-      }
-
-      function refreshActiveFilterStyles() {
-        filters.forEach((filter) => {
-          filter.classList.toggle("is-filter-active", Boolean(filter.value));
-        });
-        searchField.classList.toggle("is-filter-active", Boolean(search.value.trim()));
-        likedFilter.classList.toggle("is-filter-active", likedFilter.getAttribute("aria-pressed") === "true");
-      }
-
-      function applyFilters() {
-        const query = search.value.trim().toLowerCase();
-        const likedOnly = likedFilter.getAttribute("aria-pressed") === "true";
-        refreshActiveFilterStyles();
-        cards.forEach((card) => {
-          const matchesSearch = !query || card.dataset.name.toLowerCase().includes(query);
-          const matchesFilters = filters.every((filter) => !filter.value || card.dataset[filter.dataset.filter] === filter.value);
-          const matchesLiked = !likedOnly || card.dataset.liked === "true";
-          card.hidden = !(matchesSearch && matchesFilters && matchesLiked);
-        });
-      }
-
-      search.addEventListener("input", applyFilters);
-      filters.forEach((filter) => filter.addEventListener("change", applyFilters));
-      likedFilter.addEventListener("click", () => {
-        const isLiked = likedFilter.getAttribute("aria-pressed") !== "true";
-        likedFilter.setAttribute("aria-pressed", String(isLiked));
-        applyFilters();
-      });
-
-      // One listener on the grid handles every card, including ones added later.
-      grid.addEventListener("click", (event) => {
-        const card = event.target.closest(".available-pet-card");
-        if (!card) return;
-        if (event.target.closest(".pet-like")) {
-          const liked = card.dataset.liked !== "true";
-          setLiked(card, liked);
-          const likedPets = readLikedPets();
-          const index = likedPets.indexOf(card.dataset.profile);
-          if (liked && index === -1) likedPets.push(card.dataset.profile);
-          if (!liked && index !== -1) likedPets.splice(index, 1);
-          localStorage.setItem("pawmatchLikedPets", JSON.stringify(likedPets));
-          applyFilters();
+        if (!profile) {
+          document.title = "Pawmatch - Pet not found";
+          document.querySelector("#pet-name").textContent = "Pet not found";
+          document.querySelector("#pet-description").textContent = "We couldn't find or load this pet. It may have been adopted, or the connection failed. Please go back and try again.";
+          document.querySelector("#pet-image").remove();
+          compatibilityLink.remove();
+          matchBadge.remove();
           return;
         }
-        window.location.href = `pet-profile.html?pet=${encodeURIComponent(card.dataset.profile)}&from=available`;
-      });
 
-      // If a photo can't load (private Drive file, old path), show a generic one instead.
-      grid.addEventListener("error", (event) => {
-        const image = event.target;
-        if (!(image instanceof HTMLImageElement)) return;
-        const fallback = image.dataset.fallback;
-        if (fallback && image.getAttribute("src") !== fallback) image.src = fallback;
-      }, true);
+        document.title = `Pawmatch - ${profile.name}`;
 
-      document.querySelector("#available-pets-return").addEventListener("click", (event) => {
-        try {
-          const previousPage = new URL(document.referrer);
-          if (previousPage.origin !== window.location.origin || previousPage.href === window.location.href) return;
-          event.preventDefault();
-          window.history.back();
-        } catch {
-          // The Home link remains the fallback when there is no usable referrer.
+        // Compatibility is only calculated for pets that have hand-written trait data.
+        // For any other pet it would silently use Milo's data, so hide it instead.
+        const compareId = petId || "milo";
+        if (isQuestionnaireComplete() && compatibilityProfiles[compareId]) {
+          compatibilityLink.href = `compatibility.html?pet=${compareId}${profileSource ? `&from=${profileSource}` : ""}`;
+          compatibilityLink.hidden = false;
+          matchBadge.textContent = `${getCompatibility(compareId).percent}% Match`;
+          matchBadge.hidden = false;
+        } else {
+          compatibilityLink.remove();
+          matchBadge.remove();
         }
-      });
 
-      async function init() {
-        // The free hosting plan sleeps when idle, so the first load can be slow.
-        const slowNotice = setTimeout(() => {
-          status.textContent = "Still loading… the server may be waking up, which can take up to a minute.";
-        }, 6000);
-        try {
-          const pets = await getPets();
-          clearTimeout(slowNotice);
-          if (!pets.length) {
-            status.textContent = "No pets are available right now. Please check back soon.";
-            return;
-          }
-          fillOptions(document.querySelector('[data-filter="breed"]'), pets.map((pet) => pet.breed));
-          fillOptions(document.querySelector('[data-filter="center"]'), pets.map((pet) => pet.shelter?.name));
-          grid.innerHTML = pets.map(cardHtml).join("");
-          cards = [...grid.querySelectorAll(".available-pet-card")];
-          const likedPets = readLikedPets();
-          cards.forEach((card) => setLiked(card, likedPets.includes(card.dataset.profile)));
-          status.hidden = true;
-          applyFilters();
-        } catch (error) {
-          clearTimeout(slowNotice);
-          console.error(error);
-          status.textContent = "We couldn't load the pets. Please refresh the page to try again.";
+        const image = document.querySelector("#pet-image");
+        image.referrerPolicy = "no-referrer";
+        if (profile.fallbackImage) {
+          image.addEventListener("error", () => {
+            if (image.getAttribute("src") !== profile.fallbackImage) image.src = profile.fallbackImage;
+          });
         }
+        image.src = profile.image;
+        if (profile.imagePosition) image.style.objectPosition = profile.imagePosition;
+        image.alt = `${profile.name}, ${profile.breed}`;
+
+        document.querySelector("#pet-name").textContent = profile.name;
+        document.querySelector("#pet-path").textContent = profile.path;
+        if (profile.vaccinated) {
+          document.querySelector("#pet-vaccinated").textContent = profile.vaccinated;
+          document.querySelector("#pet-vaccinated-row").hidden = false;
+        }
+        ["breed", "age", "gender", "size", "fixed", "trained", "description", "shelter", "phone", "email", "location", "hours"].forEach((key) => {
+          document.querySelector(`#pet-${key}`).textContent = profile[key];
+        });
       }
 
-      init();
+      main();
     </script>
     <script type="module" src="./src/nav-feedback.js"></script>
   </body>

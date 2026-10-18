@@ -4,8 +4,24 @@ export const compatibilityProfiles = {
   bear: { name: "Bear", traits: { Breed: "Corgi Mix", Age: "5 Years Old", Gender: "Male", Weight: "35 Pounds", Activity: "Moderately Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Social", Path: "Foster", Children: "Good with children", Cats: "Not good with cats", Dogs: "Good with dogs", Exercise: "low" } },
   cleo: { name: "Cleo", traits: { Breed: "Calico", Age: "4 Years Old", Gender: "Female", Weight: "9 Pounds", Activity: "Non-Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Reserved", Path: "Adoption", Children: "Not good with children", Cats: "Good with cats", Dogs: "Not good with dogs", Exercise: "low" } },
   sayana: { name: "Sayana", traits: { Breed: "Pug", Age: "2 Years Old", Gender: "Female", Weight: "16 Pounds", Activity: "Moderately Active", Trained: "Yes", Disability: "Not Disabled", Sociability: "Social", Path: "Adoption", Children: "Good with children", Cats: "Good with cats", Dogs: "Good with dogs", Exercise: "low" } },
+  genesis: { name: "Genesis", traits: { Breed: "Labrador Retriever Mix", Age: "5 Years Old", Gender: "Female", Weight: "60 Pounds", Trained: "No", Path: "Adoption" } },
 };
 
+const DOG_GROUPS = {
+  Hound: ["Afghan Hound", "Basenji", "Basset Hound", "Beagle", "Bloodhound", "Borzoi", "Dachshund", "Greyhound", "Irish Wolfhound", "Norwegian Elkhound", "Otterhound", "Portuguese Podengo", "Rhodesian Ridgeback", "Saluki", "Sloughi", "Thai Ridgeback", "Whippet"],
+  Terrier: ["Terrier", "Miniature Schnauzer", "Pit Bull"],
+  Herding: ["Australian Cattle Dog", "Australian Shepherd", "Belgian Malinois", "Border Collie", "Collie", "Corgi", "German Shepherd", "Old English Sheepdog", "Puli", "Shetland Sheepdog"],
+  Working: ["Akita", "Alaskan Malamute", "Bernese Mountain Dog", "Boxer", "Bullmastiff", "Cane Corso", "Doberman", "Dogue de Bordeaux", "German Pinscher", "Giant Schnauzer", "Great Dane", "Great Pyrenees", "Greater Swiss Mountain Dog", "Komondor", "Leonberger", "Mastiff", "Newfoundland", "Portuguese Water Dog", "Rottweiler", "Saint Bernard", "Samoyed", "Siberian Husky", "Standard Schnauzer"],
+  Sporting: ["Brittany", "Chesapeake Bay Retriever", "Cocker Spaniel", "English Setter", "English Springer Spaniel", "German Shorthaired Pointer", "Golden Retriever", "Gordon Setter", "Irish Setter", "Labrador Retriever", "Lagotto Romagnolo", "Nova Scotia Duck Tolling Retriever", "Pointer", "Sussex Spaniel", "Vizsla", "Weimaraner", "Welsh Springer Spaniel", "Wirehaired Pointing Griffon", "Retriever"],
+  Toy: ["Bichon Frise", "Brussels Griffon", "Cavalier King Charles Spaniel", "Chihuahua", "Chinese Crested", "Coton de Tulear", "Havanese", "Italian Greyhound", "Japanese Chin", "Lhasa Apso", "Maltese", "Miniature Pinscher", "Papillon", "Pekingese", "Pomeranian", "Poodle", "Pug", "Shih Tzu", "Tibetan Spaniel"],
+};
+
+export function getDogGroup(breed) {
+  const name = String(breed || "").toLowerCase();
+  if (!name) return undefined;
+  const matches = Object.entries(DOG_GROUPS).flatMap(([group, breeds]) => breeds.filter((entry) => name.includes(entry.toLowerCase())).map((entry) => ({ group, length: entry.length })));
+  return matches.sort((first, second) => second.length - first.length)[0]?.group;
+}
 const HOUSEHOLD_POINTS = 4;
 const slug = (text) => String(text || "").trim().toLowerCase().replaceAll(" ", "-");
 const rankPoints = (rank) => (rank >= 10 ? 2 : 16 - rank);
@@ -21,7 +37,7 @@ function buildAnswerDefinitions(petPrefix) {
     { label: "House Training", key: `selected${petPrefix}HouseTraining`, values: { yes: "House Trained", no: "No Preference" }, trait: "Trained" },
     { label: "Disability", key: `selected${petPrefix}Disability`, values: { "not-disabled": "Not Disabled", "any-disability": "Any Disability" }, trait: "Disability" },
     ...(petPrefix === "Dog" ? [
-      { label: "Dog Group", key: "selectedDogType", trait: "Dog Group" },
+      { label: "Dog Group", key: "selectedDogType", format: (value) => value.charAt(0).toUpperCase() + value.slice(1), trait: "Dog Group" },
       { label: "Protectivity", key: "selectedDogProtective", values: { protective: "Protective", "not-protective": "Not Protective" }, trait: "Protectivity" },
       { label: "Barking", key: "selectedDogBarking", values: { "does-not-matter": "Barking Does Not Matter", "does-not-bark": "Low Barking" }, trait: "Barking" },
       { label: "Shedding", key: "selectedDogShedding", values: { "does-not-shed": "Does Not Shed", "shedding-does-not-matter": "Shedding Does Not Matter" }, trait: "Shedding" },
@@ -66,12 +82,12 @@ function matchesAnswer(profile, comparison) {
     return weight >= minimum && weight <= maximum;
   }
   if (key === "selectedWeight") {
-    const sizeByRange = { "0-10": "small", "10-30": "small", "30-50": "medium", "50-70": "medium", "70-90": "large", "90-110": "large", "greater-than-110": "large" };
+    const sizeByRange = { "0-10": "small", "10-30": "small", "30-70": "medium", "30-50": "medium", "50-70": "medium", "70-90": "large", "90-110": "large", "greater-than-110": "large" };
     const pounds = parseFloat(trait);
     const size = pounds <= 30 ? "small" : pounds <= 70 ? "medium" : "large";
     return sizeByRange[value] === size;
   }
-  if (key.endsWith("Breed")) return trait.toLowerCase() === value.toLowerCase();
+  if (key.endsWith("Breed")) return trait.toLowerCase().replace(/ mix$/, "") === value.toLowerCase();
   if (key.endsWith("HouseTraining")) return value !== "yes" || trait === "Yes";
   if (key.endsWith("Disability")) return value !== "not-disabled" || trait === "Not Disabled";
   return slug(trait) === value;
@@ -79,8 +95,10 @@ function matchesAnswer(profile, comparison) {
 
 export function getCompatibility(requestedPetId) {
   const petId = compatibilityProfiles[requestedPetId] ? requestedPetId : "milo";
-  const profile = compatibilityProfiles[petId];
+  const baseProfile = compatibilityProfiles[petId];
   const petPrefix = petId === "luna" || petId === "cleo" ? "Cat" : "Dog";
+  const dogGroup = petPrefix === "Dog" ? baseProfile.traits["Dog Group"] || getDogGroup(baseProfile.traits.Breed) : undefined;
+  const profile = { ...baseProfile, traits: { ...baseProfile.traits, ...(dogGroup ? { "Dog Group": dogGroup } : {}) } };
   const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
   const answerOf = (key) => localStorage.getItem(key);
 

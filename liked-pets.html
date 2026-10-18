@@ -32,12 +32,14 @@
       import imageCopy2 from "./src/assets/image copy 2.png";
       import imageCopy3 from "./src/assets/image copy 3.png";
       import imageCopy5 from "./src/assets/image copy 5.png";
+      import imageCopy22 from "./src/assets/image copy 22.png";
 
       const likedPets = {
-        luna: { name: "Luna", breed: "Domestic Shorthair", image: imageCopy3, gender: "Female", age: "2 years" },
-        bear: { name: "Bear", breed: "Corgi Mix", image: imageCopy5, gender: "Male", age: "5 years" },
-        cleo: { name: "Cleo", breed: "Calico", image: imageCopy2, gender: "Female", age: "4 years" },
-        sayana: { name: "Sayana", breed: "Pug", image: imageCopy5, gender: "Female", age: "2 years" }
+        luna: { name: "Luna", breed: "Domestic Shorthair", image: imageCopy3, gender: "Female", age: "Young" },
+        bear: { name: "Bear", breed: "Corgi Mix", image: imageCopy5, gender: "Male", age: "Adult" },
+        cleo: { name: "Cleo", breed: "Calico", image: imageCopy2, gender: "Female", age: "Adult" },
+        sayana: { name: "Sayana", breed: "Pug", image: imageCopy5, gender: "Female", age: "Young" },
+        genesis: { name: "Genesis", breed: "Labrador Retriever Mix", image: imageCopy22, position: "50% 15%", gender: "Female", age: "Adult" }
       };
       const liked = JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
       const grid = document.querySelector("#liked-pet-grid");
@@ -45,7 +47,7 @@
         const card = document.createElement("article");
         card.className = "profile-card";
         card.tabIndex = 0;
-        card.innerHTML = `<div class="profile-image-wrap"><img src="${pet.image}" alt="${pet.name}, ${pet.breed}" class="profile-image" /></div><div class="profile-details"><h2>${pet.name}</h2><p class="profile-type">${pet.breed}</p><dl class="profile-facts"><div><dt>Gender</dt><dd>${pet.gender}</dd></div><div><dt>Age</dt><dd>${pet.age}</dd></div></dl></div>`;
+        card.innerHTML = `<div class="profile-image-wrap"><img src="${pet.image}" style="object-position: ${pet.position || "center"}" alt="${pet.name}, ${pet.breed}" class="profile-image" /></div><div class="profile-details"><h2>${pet.name}</h2><p class="profile-type">${pet.breed}</p><dl class="profile-facts"><div><dt>Gender</dt><dd>${pet.gender}</dd></div><div><dt>Age</dt><dd>${pet.age}</dd></div></dl></div>`;
         card.addEventListener("click", () => { window.location.href = `pet-profile.html?pet=${likedPets[pet.name.toLowerCase()] ? pet.name.toLowerCase() : "luna"}&from=liked`; });
         grid.append(card);
       });

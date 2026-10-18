@@ -73,7 +73,7 @@ document.querySelectorAll('.profile-settings-sidebar a[href="liked-pets.html"]')
   link.dataset.navGuardReady = "true";
 });
 
-const notificationPetIds = ["cleo", "bear", "luna"];
+const notificationPetIds = ["cleo", "bear", "luna", "genesis"];
 const seenNotificationsKey = "pawmatchSeenNotifications";
 
 if (window.location.pathname.endsWith("notifications.html")) {
