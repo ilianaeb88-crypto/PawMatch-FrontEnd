@@ -40,27 +40,7 @@
 
     <script type="module">
       import { getPets } from "./src/api.js";
-      import imageCopy2 from "./src/assets/image copy 2.png";
-      import imageCopy3 from "./src/assets/image copy 3.png";
-      import imageCopy4 from "./src/assets/image copy 4.png";
-      import imageCopy5 from "./src/assets/image copy 5.png";
-      import imageCopy22 from "./src/assets/image copy 22.png";
-
-      // The original demo pets keep their bundled photos. Every other pet uses
-      // the image URL saved with it (for form pets, a Google Drive link).
-      const demoImages = { milo: imageCopy4, luna: imageCopy3, bear: imageCopy5, cleo: imageCopy2, genesis: imageCopy22 };
-      const fallbackImage = (pet) => `${import.meta.env.BASE_URL}${pet.animal === "Cat" ? "cat.png" : "dog-transparent.png"}`;
-      // Form pets can have several photos (pet.images); older pets only have pet.image.
-      const imagesFor = (pet) => {
-        if (demoImages[pet.id]) return [demoImages[pet.id]];
-        const images = (Array.isArray(pet.images) ? pet.images : []).filter(Boolean);
-        if (images.length) return images;
-        return [pet.image || fallbackImage(pet)];
-      };
-
-      // Pet details come from a public form, so always escape before putting them in HTML.
-      const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-      const ageText = (age) => (Number(age) > 0 ? `${age} Year${Number(age) === 1 ? "" : "s"} Old` : "Age unknown");
+      import { esc, ageText, fallbackImage, imagesFor, readLikedPets, useFallbackImages, withSlowNotice } from "./src/pet-data.js";
 
       const grid = document.querySelector("#available-pet-grid");
       const status = document.querySelector("#pet-status");
@@ -69,14 +49,6 @@
       const filters = [...document.querySelectorAll("[data-filter]")];
       const searchField = search.closest(".pet-search-field");
       let cards = [];
-
-      function readLikedPets() {
-        try {
-          return JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
-        } catch {
-          return [];
-        }
-      }
 
       function carouselHtml(pet) {
         const images = imagesFor(pet);
@@ -189,13 +161,7 @@
         });
       }, true);
 
-      // If a photo can't load (private Drive file, old path), show a generic one instead.
-      grid.addEventListener("error", (event) => {
-        const image = event.target;
-        if (!(image instanceof HTMLImageElement)) return;
-        const fallback = image.dataset.fallback;
-        if (fallback && image.getAttribute("src") !== fallback) image.src = fallback;
-      }, true);
+      useFallbackImages(grid);
 
       document.querySelector("#available-pets-return").addEventListener("click", (event) => {
         try {
@@ -209,13 +175,8 @@
       });
 
       async function init() {
-        // The free hosting plan sleeps when idle, so the first load can be slow.
-        const slowNotice = setTimeout(() => {
-          status.textContent = "Still loading… the server may be waking up, which can take up to a minute.";
-        }, 6000);
         try {
-          const pets = await getPets();
-          clearTimeout(slowNotice);
+          const pets = await withSlowNotice(status, getPets());
           if (!pets.length) {
             status.textContent = "No pets are available right now. Please check back soon.";
             return;
@@ -229,7 +190,6 @@
           status.hidden = true;
           applyFilters();
         } catch (error) {
-          clearTimeout(slowNotice);
           console.error(error);
           status.textContent = "We couldn't load the pets. Please refresh the page to try again.";
         }

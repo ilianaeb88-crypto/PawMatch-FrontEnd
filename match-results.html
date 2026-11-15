@@ -36,155 +36,84 @@
           <p>Meet the Animals Who Are the Best Fits for You</p>
         </div>
 
-        <section class="profile-grid" aria-label="Animal matches">
-          <article class="profile-card" data-profile="milo" tabindex="0">
-            <div class="profile-image-wrap">
-              <img src="src/assets/image copy 4.png" alt="Milo, a Border Collie mix" class="profile-image profile-dog" />
-              <span class="match-score">98% Match</span>
-            </div>
-            <div class="profile-details">
-              <h2>Milo</h2>
-              <p class="profile-type">German Shepherd</p>
-              <dl class="profile-facts">
-                <div><dt>Gender</dt><dd>Male</dd></div>
-                <div><dt>Age</dt><dd>Adult</dd></div>
-              </dl>
-            </div>
-          </article>
-
-          <article class="profile-card" data-profile="luna" tabindex="0">
-            <div class="profile-image-wrap">
-              <img src="src/assets/image copy 3.png" alt="Luna, a tabby cat" class="profile-image profile-cat" />
-              <span class="match-score">95% Match</span>
-            </div>
-            <div class="profile-details">
-              <h2>Luna</h2>
-              <p class="profile-type">Domestic Shorthair</p>
-              <dl class="profile-facts">
-                <div><dt>Gender</dt><dd>Female</dd></div>
-                <div><dt>Age</dt><dd>Young</dd></div>
-              </dl>
-            </div>
-          </article>
-
-          <article class="profile-card" data-profile="bear" tabindex="0">
-            <div class="profile-image-wrap">
-              <img src="src/assets/image copy 5.png" alt="Bear, a Corgi mix" class="profile-image profile-dog" />
-              <span class="match-score">91% Match</span>
-            </div>
-            <div class="profile-details">
-              <h2>Bear</h2>
-              <p class="profile-type">Shepherd Mix</p>
-              <dl class="profile-facts">
-                <div><dt>Gender</dt><dd>Male</dd></div>
-                <div><dt>Age</dt><dd>Adult</dd></div>
-              </dl>
-            </div>
-          </article>
-
-          <article class="profile-card" data-profile="cleo" tabindex="0">
-            <div class="profile-image-wrap">
-              <img src="src/assets/image copy 2.png" alt="Cleo, a tabby cat" class="profile-image profile-cat" />
-              <span class="match-score">88% Match</span>
-            </div>
-            <div class="profile-details">
-              <h2>Cleo</h2>
-              <p class="profile-type">Calico</p>
-              <dl class="profile-facts">
-                <div><dt>Gender</dt><dd>Female</dd></div>
-                <div><dt>Age</dt><dd>Adult</dd></div>
-              </dl>
-            </div>
-          </article>
-        </section>
-        <p class="matches-empty" id="matches-empty" role="status" hidden>No Pets Matched Your Top-Ranked Preferences</p>
+        <section class="profile-grid" id="match-grid" aria-label="Animal matches"></section>
+        <p class="matches-empty" id="matches-empty" role="status">Finding your matches…</p>
       </main>
     </div>
-    <script>
-      const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
+    <script type="module">
+      import { getPets } from "./src/api.js";
+      import { getCompatibility } from "./src/compatibility.js";
+      import { esc, fallbackImage, imagesFor, useFallbackImages, withSlowNotice } from "./src/pet-data.js";
+
+      const grid = document.querySelector("#match-grid");
+      const status = document.querySelector("#matches-empty");
       const selectedPet = localStorage.getItem("selectedPet");
-      const topRankedAnswers = Object.entries(savedRanks)
-        .map(([key, rank]) => ({ key, rank: Number(rank), value: localStorage.getItem(key) }))
-        .filter((answer) => {
-          if (!answer.value || !Number.isFinite(answer.rank)) return false;
-          const normalizedValue = answer.value.trim().toLowerCase();
-          if (["any", "no-preference", "no", "no preference", "not-protective"].includes(normalizedValue)) return false;
-          if (answer.key === "selectedWeight" || answer.key.startsWith("selectedDog")) return selectedPet === "dog";
-          if (answer.key.startsWith("selectedCat")) return selectedPet === "cat";
-          return true;
-        })
-        .sort((first, second) => first.rank - second.rank)
-        .slice(0, 3);
+      const ageGroup = (age) => (!(Number(age) > 0) ? "Unknown" : age < 1 ? "Baby" : age < 3 ? "Young" : age <= 7 ? "Adult" : "Senior");
+      useFallbackImages(grid);
 
-      const pets = {
-        milo: { species: "dog", breed: "German Shepherd", group: "herding", age: 3, gender: "male", size: "medium", activity: "very-active", trained: "yes", disability: "not-disabled", personality: "social" },
-        luna: { species: "cat", breed: "Domestic Shorthair", age: 2, gender: "female", weight: 8, activity: "moderately-active", trained: "yes", disability: "not-disabled", personality: "reserved" },
-        bear: { species: "dog", breed: "Shepherd Mix", group: "herding", age: 5, gender: "male", size: "medium", activity: "moderately-active", trained: "yes", disability: "not-disabled", personality: "social" },
-        cleo: { species: "cat", breed: "Calico", age: 4, gender: "female", weight: 9, activity: "non-active", trained: "yes", disability: "not-disabled", personality: "reserved" },
+      // A pet is a match when it's the species the person chose and it doesn't
+      // conflict with any of their top 3 ranked answers. Unknown traits don't count against it.
+      function isMatch(pet, compatibility) {
+        if (selectedPet && pet.animal?.toLowerCase() !== selectedPet) return false;
+        return compatibility.rows
+          .filter((row) => row.ranked)
+          .slice(0, 3)
+          .every((row) => !row.characteristic || row.matched);
+      }
+
+      function cardHtml({ pet, compatibility }) {
+        return `
+          <article class="profile-card" data-profile="${esc(pet.id)}" tabindex="0">
+            <div class="profile-image-wrap">
+              <img src="${esc(imagesFor(pet)[0])}" alt="${esc(pet.name)}, ${esc(pet.breed)}" class="profile-image" data-fallback="${esc(fallbackImage(pet))}" loading="lazy" referrerpolicy="no-referrer" />
+              <span class="match-score">${compatibility.percent}% Match</span>
+            </div>
+            <div class="profile-details">
+              <h2>${esc(pet.name)}</h2>
+              <p class="profile-type">${esc(pet.breed)}</p>
+              <dl class="profile-facts">
+                <div><dt>Gender</dt><dd>${esc(pet.gender)}</dd></div>
+                <div><dt>Age</dt><dd>${ageGroup(Number(pet.age))}</dd></div>
+              </dl>
+            </div>
+          </article>`;
+      }
+
+      const openProfile = (card) => {
+        window.location.href = `pet-profile.html?pet=${encodeURIComponent(card.dataset.profile)}&from=matches`;
       };
-
-      function matchesAge(age, preference) {
-        if (preference === "less-than-6-months") return age < 0.5;
-        if (preference === "1-3") return age >= 1 && age < 3;
-        if (preference === "3-7") return age >= 3 && age <= 7;
-        if (preference === "greater-than-7") return age > 7;
-        return true;
-      }
-
-      function matchesWeight(pet, answerKey, preference) {
-        if (answerKey === "selectedCatWeight") {
-          if (typeof pet.weight !== "number") return true;
-          const [minimum, maximum] = preference.split("-").map(Number);
-          if (preference === "greater-than-25") return pet.weight > 25;
-          return pet.weight >= minimum && pet.weight <= maximum;
-        }
-
-        if (answerKey === "selectedWeight") {
-          if (!pet.size) return true;
-          const sizeByRange = {
-            "0-10": "small", "10-30": "small", "30-70": "medium", "30-50": "medium", "50-70": "medium",
-            "70-90": "large", "90-110": "large", "greater-than-110": "large",
-          };
-          return sizeByRange[preference] === pet.size;
-        }
-
-        return true;
-      }
-
-      function matchesRankedAnswer(pet, answer) {
-        const { key, value } = answer;
-        if (key === "selectedGender") return value === "any" || pet.gender === value;
-        if (key === "selectedAge") return matchesAge(pet.age, value);
-        if (key === "selectedWeight" || key === "selectedCatWeight") return matchesWeight(pet, key, value);
-        if (key.endsWith("Breed")) return pet.breed.toLowerCase() === value.toLowerCase();
-        if (key.endsWith("Activity")) return pet.activity === value;
-        if (key.endsWith("HouseTraining")) return value !== "yes" || pet.trained === "yes";
-        if (key.endsWith("Disability")) return value !== "not-disabled" || pet.disability === "not-disabled";
-        if (key.endsWith("Personality")) return pet.personality === value;
-        if (key === "selectedDogType") return pet.group === value;
-        return false;
-      }
-
-      const profileCards = [...document.querySelectorAll(".profile-card")];
-      profileCards.forEach((card) => {
-        const pet = pets[card.dataset.profile];
-        const matchesSpecies = pet && (!selectedPet || pet.species === selectedPet);
-        const matchesPreferences = matchesSpecies && topRankedAnswers.every((answer) => matchesRankedAnswer(pet, answer));
-        card.hidden = !matchesPreferences;
-
-        const openProfile = () => {
-          window.location.href = `pet-profile.html?pet=${card.dataset.profile}&from=matches`;
-        };
-
-        card.addEventListener("click", openProfile);
-        card.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            openProfile();
-          }
-        });
+      grid.addEventListener("click", (event) => {
+        const card = event.target.closest(".profile-card");
+        if (card) openProfile(card);
       });
-      document.querySelector("#matches-empty").hidden = profileCards.some((card) => !card.hidden);
+      grid.addEventListener("keydown", (event) => {
+        const card = event.target.closest(".profile-card");
+        if (card && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          openProfile(card);
+        }
+      });
+
+      async function init() {
+        try {
+          const pets = await withSlowNotice(status, getPets());
+          const matches = pets
+            .map((pet) => ({ pet, compatibility: getCompatibility(pet) }))
+            .filter(({ pet, compatibility }) => isMatch(pet, compatibility))
+            .sort((first, second) => second.compatibility.percent - first.compatibility.percent);
+          if (!matches.length) {
+            status.textContent = "No Pets Matched Your Top-Ranked Preferences";
+            return;
+          }
+          grid.innerHTML = matches.map(cardHtml).join("");
+          status.hidden = true;
+        } catch (error) {
+          console.error(error);
+          status.textContent = "We couldn't load your matches. Please refresh the page to try again.";
+        }
+      }
+
+      init();
     </script>
     <script type="module" src="./src/nav-feedback.js"></script>
   </body>

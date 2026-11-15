@@ -97,7 +97,8 @@
           age: Number(pet.age) > 0 ? `${pet.age} Year${Number(pet.age) === 1 ? "" : "s"} Old` : "Unknown",
           gender: pet.gender, size: orNA(pet.size === "Unknown" ? "" : pet.size), fixed: yesNo(pet.fixed), trained: yesNo(pet.trained),
           description: pet.description || "", shelter: orNA(pet.shelter?.name), phone: orNA(pet.shelter?.phone),
-          email: orNA(pet.shelter?.email), location: orNA(pet.shelter?.location), hours: orNA(pet.shelter?.hours)
+          email: orNA(pet.shelter?.email), location: orNA(pet.shelter?.location), hours: orNA(pet.shelter?.hours),
+          apiPet: pet
         };
       }
 
@@ -137,13 +138,13 @@
 
         document.title = `Pawmatch - ${profile.name}`;
 
-        // Compatibility is only calculated for pets that have hand-written trait data.
-        // For any other pet it would silently use Milo's data, so hide it instead.
+        // Demo pets use their hand-written trait data; API pets are scored from their own details.
         const compareId = petId || "milo";
-        if (isQuestionnaireComplete() && compatibilityProfiles[compareId]) {
-          compatibilityLink.href = `compatibility.html?pet=${compareId}${profileSource ? `&from=${profileSource}` : ""}`;
+        const compareWith = compatibilityProfiles[compareId] ? compareId : profile.apiPet;
+        if (isQuestionnaireComplete() && compareWith) {
+          compatibilityLink.href = `compatibility.html?pet=${encodeURIComponent(compareId)}${profileSource ? `&from=${profileSource}` : ""}`;
           compatibilityLink.hidden = false;
-          matchBadge.textContent = `${getCompatibility(compareId).percent}% Match`;
+          matchBadge.textContent = `${getCompatibility(compareWith).percent}% Match`;
           matchBadge.hidden = false;
         } else {
           compatibilityLink.remove();

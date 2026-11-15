@@ -29,29 +29,43 @@
       </main>
     </div>
     <script type="module">
-      import imageCopy2 from "./src/assets/image copy 2.png";
-      import imageCopy3 from "./src/assets/image copy 3.png";
-      import imageCopy5 from "./src/assets/image copy 5.png";
-      import imageCopy22 from "./src/assets/image copy 22.png";
+      import { getPets } from "./src/api.js";
+      import { esc, ageText, fallbackImage, imagesFor, readLikedPets, useFallbackImages, withSlowNotice } from "./src/pet-data.js";
 
-      const likedPets = {
-        luna: { name: "Luna", breed: "Domestic Shorthair", image: imageCopy3, gender: "Female", age: "Young" },
-        bear: { name: "Bear", breed: "Corgi Mix", image: imageCopy5, gender: "Male", age: "Adult" },
-        cleo: { name: "Cleo", breed: "Calico", image: imageCopy2, gender: "Female", age: "Adult" },
-        sayana: { name: "Sayana", breed: "Pug", image: imageCopy5, gender: "Female", age: "Young" },
-        genesis: { name: "Genesis", breed: "Labrador Retriever Mix", image: imageCopy22, position: "50% 15%", gender: "Female", age: "Adult" }
-      };
-      const liked = JSON.parse(localStorage.getItem("pawmatchLikedPets") || "[]");
       const grid = document.querySelector("#liked-pet-grid");
-      liked.map((id) => likedPets[id]).filter(Boolean).forEach((pet) => {
-        const card = document.createElement("article");
-        card.className = "profile-card";
-        card.tabIndex = 0;
-        card.innerHTML = `<div class="profile-image-wrap"><img src="${pet.image}" style="object-position: ${pet.position || "center"}" alt="${pet.name}, ${pet.breed}" class="profile-image" /></div><div class="profile-details"><h2>${pet.name}</h2><p class="profile-type">${pet.breed}</p><dl class="profile-facts"><div><dt>Gender</dt><dd>${pet.gender}</dd></div><div><dt>Age</dt><dd>${pet.age}</dd></div></dl></div>`;
-        card.addEventListener("click", () => { window.location.href = `pet-profile.html?pet=${likedPets[pet.name.toLowerCase()] ? pet.name.toLowerCase() : "luna"}&from=liked`; });
-        grid.append(card);
-      });
-      if (!grid.children.length) grid.innerHTML = "<p class=\"ranking-empty\">You have not liked any pets yet.</p>";
+      const showMessage = (text) => { grid.innerHTML = `<p class="ranking-empty" role="status">${esc(text)}</p>`; };
+      useFallbackImages(grid);
+
+      function cardHtml(pet) {
+        return `
+          <a class="profile-card" href="pet-profile.html?pet=${encodeURIComponent(pet.id)}&amp;from=liked">
+            <div class="profile-image-wrap"><img src="${esc(imagesFor(pet)[0])}" alt="${esc(pet.name)}, ${esc(pet.breed)}" class="profile-image" data-fallback="${esc(fallbackImage(pet))}" loading="lazy" referrerpolicy="no-referrer" /></div>
+            <div class="profile-details">
+              <h2>${esc(pet.name)}</h2>
+              <p class="profile-type">${esc(pet.breed)}</p>
+              <dl class="profile-facts"><div><dt>Gender</dt><dd>${esc(pet.gender)}</dd></div><div><dt>Age</dt><dd>${esc(ageText(pet.age))}</dd></div></dl>
+            </div>
+          </a>`;
+      }
+
+      async function init() {
+        const likedIds = readLikedPets();
+        if (!likedIds.length) return showMessage("You have not liked any pets yet.");
+        showMessage("Loading your liked pets…");
+        try {
+          const pets = await withSlowNotice(grid.querySelector("p"), getPets());
+          // Keep the order the pets were liked in; skip pets that are no longer listed.
+          const byId = new Map(pets.map((pet) => [pet.id, pet]));
+          const liked = likedIds.map((id) => byId.get(id)).filter(Boolean);
+          if (!liked.length) return showMessage("The pets you liked are no longer listed.");
+          grid.innerHTML = liked.map(cardHtml).join("");
+        } catch (error) {
+          console.error(error);
+          showMessage("We couldn't load your liked pets. Please refresh the page to try again.");
+        }
+      }
+
+      init();
     </script>
     <script type="module" src="./src/nav-feedback.js"></script>
   </body>

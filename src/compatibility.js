@@ -87,16 +87,55 @@ function matchesAnswer(profile, comparison) {
     const size = pounds <= 30 ? "small" : pounds <= 70 ? "medium" : "large";
     return sizeByRange[value] === size;
   }
-  if (key.endsWith("Breed")) return trait.toLowerCase().replace(/ mix$/, "") === value.toLowerCase();
+  // Form breeds are free text ("German Shepherd and Husky Mix"), so a mention of the breed counts.
+  if (key.endsWith("Breed")) return trait.toLowerCase().includes(value.toLowerCase());
   if (key.endsWith("HouseTraining")) return value !== "yes" || trait === "Yes";
   if (key.endsWith("Disability")) return value !== "not-disabled" || trait === "Not Disabled";
   return slug(trait) === value;
 }
 
-export function getCompatibility(requestedPetId) {
-  const petId = compatibilityProfiles[requestedPetId] ? requestedPetId : "milo";
-  const baseProfile = compatibilityProfiles[petId];
-  const petPrefix = petId === "luna" || petId === "cleo" ? "Cat" : "Dog";
+const CAT_DEMO_IDS = ["luna", "cleo"];
+const ACTIVITY_LABELS = { "very-active": "Very Active", "moderately-active": "Moderately Active", "non-active": "Non-Active" };
+const boolTrait = (value, yes, no) => (value === true ? yes : value === false ? no : undefined);
+
+// Turns a pet from the API into the same trait shape as the hand-written profiles above.
+// Traits the pet doesn't have are left out, and show as "Not provided" (half points).
+export function compatibilityProfileFromPet(pet) {
+  const species = pet.animal === "Cat" ? "Cat" : "Dog";
+  const weight = Number(pet.weight) > 0 ? Number(pet.weight) : parseFloat(String(pet.size || "").replace(/[^\d.]+/g, " "));
+  const coat = String(pet.coat || "").toLowerCase();
+  const group = pet.akcGroup && pet.akcGroup !== "Unknown" ? pet.akcGroup : getDogGroup(pet.breed);
+  const traits = {
+    Breed: pet.breed || undefined,
+    Age: Number(pet.age) > 0 ? `${pet.age} Years Old` : undefined,
+    Gender: pet.gender || undefined,
+    Weight: weight > 0 ? `${weight} Pounds` : undefined,
+    "Hair Length": coat.includes("long") ? "Long-Hair" : coat.includes("short") ? "Short-Hair" : undefined,
+    Activity: ACTIVITY_LABELS[pet.activity],
+    Trained: boolTrait(pet.trained, "Yes", "No"),
+    Disability: boolTrait(pet.disabled, "Disabled", "Not Disabled"),
+    Sociability: pet.personality ? pet.personality.charAt(0).toUpperCase() + pet.personality.slice(1) : undefined,
+    Path: pet.path || undefined,
+    ...(species === "Dog" ? {
+      "Dog Group": group,
+      Protectivity: boolTrait(pet.protective, "Protective", "Not Protective"),
+      Barking: boolTrait(pet.barking, "Barks", "Does Not Bark"),
+      Shedding: boolTrait(pet.shedding, "Sheds", "Does Not Shed"),
+    } : {}),
+  };
+  Object.keys(traits).forEach((key) => traits[key] === undefined && delete traits[key]);
+  return { name: pet.name, species, traits };
+}
+
+// Accepts a demo pet id (e.g. "milo") or a pet object from the API.
+export function getCompatibility(petOrId) {
+  const isPetObject = petOrId && typeof petOrId === "object";
+  const requestedId = isPetObject ? petOrId.id : petOrId;
+  // The demo pets keep their richer hand-written profiles (children, cats, dogs...).
+  const useDemo = Boolean(compatibilityProfiles[requestedId]) || !isPetObject;
+  const petId = useDemo ? (compatibilityProfiles[requestedId] ? requestedId : "milo") : requestedId;
+  const baseProfile = useDemo ? compatibilityProfiles[petId] : compatibilityProfileFromPet(petOrId);
+  const petPrefix = baseProfile.species || (CAT_DEMO_IDS.includes(petId) ? "Cat" : "Dog");
   const dogGroup = petPrefix === "Dog" ? baseProfile.traits["Dog Group"] || getDogGroup(baseProfile.traits.Breed) : undefined;
   const profile = { ...baseProfile, traits: { ...baseProfile.traits, ...(dogGroup ? { "Dog Group": dogGroup } : {}) } };
   const savedRanks = JSON.parse(localStorage.getItem("answerRanks") || "{}");
@@ -131,6 +170,7 @@ export function getCompatibility(requestedPetId) {
     rows.push({
       answer: getAnswerLabel(comparison, comparison.value),
       points: rankPoints(savedRanks[comparison.key]),
+      ranked: true,
       matched: matchesAnswer(profile, comparison),
       characteristic: comparison.trait === "Trained" && profile.traits.Trained === "Yes" ? "House Trained" : profile.traits[comparison.trait],
     });

@@ -42,13 +42,34 @@
     </div>
 
     <script type="module">
-      import { getCompatibility } from "./src/compatibility.js";
+      import { getPet } from "./src/api.js";
+      import { compatibilityProfiles, getCompatibility } from "./src/compatibility.js";
 
-      const from = new URLSearchParams(window.location.search).get("from");
-      const { petId, profile, rows, earnedPoints, totalPoints, percent } = getCompatibility(new URLSearchParams(window.location.search).get("pet"));
+      const params = new URLSearchParams(window.location.search);
+      const from = params.get("from");
+      const requestedId = params.get("pet") || "milo";
+
+      // Demo pets are scored from hand-written data; any other pet is loaded from the API.
+      async function loadPet() {
+        if (compatibilityProfiles[requestedId]) return requestedId;
+        try {
+          return await getPet(requestedId);
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
+      }
+
+      const pet = await loadPet();
+      if (!pet) {
+        document.title = "Pawmatch - Pet not found";
+        document.querySelector("#compatibility-name").textContent = "We couldn't load this pet. Please go back and try again.";
+        throw new Error(`Could not load pet ${requestedId}`);
+      }
+      const { petId, profile, rows, earnedPoints, totalPoints, percent } = getCompatibility(pet);
       document.title = `Pawmatch - ${profile.name} Compatibility`;
       document.querySelector("#compatibility-name").textContent = profile.name;
-      document.querySelector("#compatibility-return").href = `pet-profile.html?pet=${petId}${from ? `&from=${from}` : ""}`;
+      document.querySelector("#compatibility-return").href = `pet-profile.html?pet=${encodeURIComponent(petId)}${from ? `&from=${from}` : ""}`;
       document.querySelector("#compatibility-total").textContent = `Total Compatibility: ${earnedPoints}/${totalPoints}`;
       document.querySelector("#compatibility-percent").textContent = `${percent}% Match`;
 
