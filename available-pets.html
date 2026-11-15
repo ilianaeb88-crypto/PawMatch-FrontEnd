@@ -50,7 +50,13 @@
       // the image URL saved with it (for form pets, a Google Drive link).
       const demoImages = { milo: imageCopy4, luna: imageCopy3, bear: imageCopy5, cleo: imageCopy2, genesis: imageCopy22 };
       const fallbackImage = (pet) => `${import.meta.env.BASE_URL}${pet.animal === "Cat" ? "cat.png" : "dog-transparent.png"}`;
-      const imageFor = (pet) => demoImages[pet.id] || pet.image || fallbackImage(pet);
+      // Form pets can have several photos (pet.images); older pets only have pet.image.
+      const imagesFor = (pet) => {
+        if (demoImages[pet.id]) return [demoImages[pet.id]];
+        const images = (Array.isArray(pet.images) ? pet.images : []).filter(Boolean);
+        if (images.length) return images;
+        return [pet.image || fallbackImage(pet)];
+      };
 
       // Pet details come from a public form, so always escape before putting them in HTML.
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -72,11 +78,36 @@
         }
       }
 
+      function carouselHtml(pet) {
+        const images = imagesFor(pet);
+        const count = images.length;
+        const slides = images.map((src, index) => `
+              <img src="${esc(src)}" alt="${esc(pet.name)}, ${esc(pet.breed)}${count > 1 ? ` (photo ${index + 1} of ${count})` : ""}" data-fallback="${esc(fallbackImage(pet))}" loading="lazy" referrerpolicy="no-referrer" />`).join("");
+        if (count < 2) return `<div class="pet-carousel"><div class="pet-carousel-track">${slides}</div></div>`;
+        const dots = images.map((_, index) => `<span class="pet-carousel-dot${index === 0 ? " is-active" : ""}"></span>`).join("");
+        return `
+            <div class="pet-carousel has-multiple">
+              <div class="pet-carousel-track">${slides}</div>
+              <button class="pet-carousel-btn pet-carousel-prev" type="button" data-step="-1" aria-label="Previous photo of ${esc(pet.name)}">‹</button>
+              <button class="pet-carousel-btn pet-carousel-next" type="button" data-step="1" aria-label="Next photo of ${esc(pet.name)}">›</button>
+              <div class="pet-carousel-dots" aria-hidden="true">${dots}</div>
+            </div>`;
+      }
+
+      // Moves a card's carousel one photo left or right, wrapping around at the ends.
+      function stepCarousel(carousel, step) {
+        const track = carousel.querySelector(".pet-carousel-track");
+        const count = track.children.length;
+        const current = Math.round(track.scrollLeft / track.clientWidth);
+        const next = (current + step + count) % count;
+        track.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
+      }
+
       function cardHtml(pet) {
         return `
           <article class="available-pet-card" data-profile="${esc(pet.id)}" data-path="${esc(pet.path)}" data-name="${esc(pet.name)}" data-animal="${esc(pet.animal)}" data-breed="${esc(pet.breed)}" data-gender="${esc(pet.gender)}" data-center="${esc(pet.shelter?.name)}" data-liked="false">
             <button class="pet-like" type="button" aria-label="Like ${esc(pet.name)}" aria-pressed="false">♡</button>
-            <img src="${esc(imageFor(pet))}" alt="${esc(pet.name)}, ${esc(pet.breed)}" data-fallback="${esc(fallbackImage(pet))}" loading="lazy" referrerpolicy="no-referrer" />
+            ${carouselHtml(pet)}
             <div class="available-pet-meta"><strong>${esc(pet.name)}</strong><span>${esc(pet.gender)}</span><span>${esc(ageText(pet.age))}</span><span>${esc(pet.breed)}</span></div>
           </article>`;
       }
@@ -128,6 +159,11 @@
       grid.addEventListener("click", (event) => {
         const card = event.target.closest(".available-pet-card");
         if (!card) return;
+        const carouselButton = event.target.closest(".pet-carousel-btn");
+        if (carouselButton) {
+          stepCarousel(carouselButton.closest(".pet-carousel"), Number(carouselButton.dataset.step));
+          return;
+        }
         if (event.target.closest(".pet-like")) {
           const liked = card.dataset.liked !== "true";
           setLiked(card, liked);
@@ -141,6 +177,17 @@
         }
         window.location.href = `pet-profile.html?pet=${encodeURIComponent(card.dataset.profile)}&from=available`;
       });
+
+      // Keep the dots in sync whether the photo changed by button or by swiping.
+      // (scroll events don't bubble, so listen in the capture phase.)
+      grid.addEventListener("scroll", (event) => {
+        const track = event.target;
+        if (!(track instanceof HTMLElement) || !track.classList.contains("pet-carousel-track")) return;
+        const current = Math.round(track.scrollLeft / track.clientWidth);
+        track.parentElement.querySelectorAll(".pet-carousel-dot").forEach((dot, index) => {
+          dot.classList.toggle("is-active", index === current);
+        });
+      }, true);
 
       // If a photo can't load (private Drive file, old path), show a generic one instead.
       grid.addEventListener("error", (event) => {
